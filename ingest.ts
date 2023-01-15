@@ -1,0 +1,146 @@
+const execSync = require('child_process').execSync;
+
+var randomstring = require("randomstring");
+// import { execSync } from 'child_process';  // replace ^ if using ES modules
+
+const config = require('./config.json');
+
+function generateIdempotency() {
+    return `${Date.now()}${randomstring.generate({
+      length: 10,
+      charset: 'alphanumeric',
+      capitalization: 'lowercase'
+    })}`;
+  }
+
+const nameofidemp = generateIdempotency();
+
+const csvname = 'inputs/' + nameofidemp + '.csv';
+
+const makenewfolder = execSync('[ -d inputs ] || mkdir inputs', { encoding: 'utf-8' });  // the default is 'buffer'
+console.log('Output was:\n', makenewfolder);
+if (true){
+const output = execSync(
+    'wget https://controllerdata.lacity.org/api/views/pggv-e4fn/rows.csv?accessType=DOWNLOAD -O '
+     + csvname, 
+     { encoding: 'utf-8',
+     stdio: 'inherit'});  // the default is 'buffer'
+}
+
+const setup = `PGPASSWORD=${config.password} psql -U ${config.username} -h ${config.hostname}`
+
+     const postgresingest = execSync(
+        `${setup} -d postgres -c "
+        
+        CREATE TABLE IF NOT EXISTS init${nameofidemp} (
+          id_number integer PRIMARY KEY,
+    fiscal_year smallint,
+    department_name VARCHAR(255),
+    vendor_name VARCHAR(255),
+    transaction_date DATE,
+    dollar_amount decimal,
+    authority VARCHAR(255),
+    business_tax_registration_certificate VARCHAR(255),
+    government_activity VARCHAR(255),
+    fund_group_name VARCHAR(255),
+    fund_type VARCHAR(255),
+    fund_name VARCHAR(255),
+    fund VARCHAR(255),
+    account_name VARCHAR(255),
+    account_code VARCHAR(255),
+    transaction_id VARCHAR(255),
+    expenditure_type VARCHAR(255),
+    settlement_judgment VARCHAR(255),
+    fiscal_month_number smallint,
+    fiscal_year_month VARCHAR(255),
+    fiscal_year_quarter VARCHAR(255),
+    calendar_month_number smallint,
+    calendar_month_year VARCHAR(255),
+    calendar_month VARCHAR(255),
+    data_source VARCHAR(255),
+    authority_name VARCHAR(255),
+    authority_link VARCHAR(255),
+    department_number VARCHAR(255),
+    program VARCHAR(255),
+    vendor_id VARCHAR(255),
+    zip VARCHAR(255),
+    payment_method VARCHAR(255),
+    payment_status VARCHAR(255),
+    inv_num VARCHAR(255),
+    invoice_due_date DATE,
+    invoice_discount_due_date DATE,
+    inv_date DATE,
+    inv_line decimal,
+    invoice_distribution_line decimal,
+    po_num VARCHAR(255),
+    description VARCHAR(255),
+    detailed_item_description VARCHAR(255),
+    unit_price decimal,
+    unit_of_measure VARCHAR(255),
+    quantity decimal,
+    sales_tax_percent decimal,
+    sales_tax decimal,
+    discount decimal,
+    receiver_id VARCHAR(4095),
+    po_date DATE,
+    po_line_number decimal,
+    procurement_organization VARCHAR(255),
+    buyer_name VARCHAR(255),
+    supplier_city VARCHAR(255),
+    supplier_country VARCHAR(255),
+    bu_name VARCHAR(255),
+    site_location VARCHAR(255),
+    item_code VARCHAR(255),
+    item_code_name VARCHAR(255),
+    currency VARCHAR(255),
+    value_of_spend decimal,
+    vendor_num VARCHAR(255)
+          )
+        "`, 
+         { encoding: 'utf-8',
+         stdio: 'inherit'});  // the default is 'buffer'
+
+         console.log(`table made init${nameofidemp}`);
+         console.log('ingesting into postgres', new Date);
+
+         const csvstep2 = execSync(
+          `${setup} -d postgres -c "\\copy init${nameofidemp} from '${csvname}' DELIMITER ',' CSV HEADER;"`, 
+           { encoding: 'utf-8',
+           stdio: 'inherit'});  // the default is 'buffer'
+  
+
+           console.log(`injest done at ${new Date}`) 
+
+          var listofalias = [
+                        // ensure the table at least exists, if not, create it
+            'CREATE TABLE IF NOT EXISTS aliastable (input varchar(255) PRIMARY KEY,showas varchar(255));',
+            //insert the alias into the table
+            `INSERT INTO aliastable (input, showas) VALUES ('MICROSOFT CORP', 'MICROSOFT CORPORATION');`,
+          ]
+
+          
+         const aliaspostgrs = execSync(
+          `${setup} -d postgres -c "${listofalias.join('')}"`, 
+           { encoding: 'utf-8',
+           stdio: 'inherit'});  // the default is 'buffer'
+
+          const listofsqlrequests = [
+            //start the series of transactions, don't save it until the end.
+            'BEGIN;',
+            //perform an alias lookup
+            `SELECT * from init${nameofidemp} LEFT JOIN aliastable ON init${nameofidemp}.vendor_name = aliastable.input INTO aliased${nameofidemp};`,
+            //create the real table
+            `CREATE TABLE IF NOT EXISTS losangelescheckbooknew AS SELECT * FROM aliased${nameofidemp};`,
+            //rename the aliased table into losangelescheckbook
+            `ALTER TABLE aliased${nameofidemp} RENAME TO losangelescheckbook;`,
+            //drop the init table
+            `DROP TABLE IF EXISTS init${nameofidemp};`,
+            //drop the old table
+            `DROP TABLE IF EXISTS losangelescheckbook;`,
+            //create the vendor lookup table
+            `COMMIT;`
+          ]
+          const sqlimport = execSync(
+            `${setup} -d postgres -c "${listofsqlrequests.join('')}"`, 
+             { encoding: 'utf-8',
+             stdio: 'inherit'});  // the default is 'buffer'
