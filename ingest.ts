@@ -159,15 +159,17 @@ const output = execSync(
             //rename the aliased table into losangelescheckbook
               //drop the init table
               `DROP TABLE IF EXISTS init${nameofidemp};`,
+              `DROP TABLE IF EXISTS aliased${nameofidemp};`,
               //drop the old table
               `DROP TABLE IF EXISTS losangelescheckbook;`,
 
               `DROP TABLE IF EXISTS vendors_summed;`,
 
-            `ALTER TABLE aliased${nameofidemp} RENAME TO losangelescheckbook;`,
-          
-            `CREATE TABLE IF NOT EXISTS vendor_summed AS (SELECT count(*), sum(dollar_amount), vendor_name FROM losangelescheckbook GROUP BY vendor_name ORDER BY SUM(dollar_amount) desc);`,
+            //rename the new table to the old table
+            `ALTER TABLE losangelescheckbooknew RENAME TO losangelescheckbook;`,
             //create the vendor lookup table
+            `CREATE TABLE IF NOT EXISTS vendor_summed AS (SELECT count(*), sum(dollar_amount), vendor_name FROM losangelescheckbook GROUP BY vendor_name ORDER BY SUM(dollar_amount) desc);`,
+            
             `COMMIT;`
           ]
           const sqlimport = execSync(
