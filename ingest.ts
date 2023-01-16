@@ -142,7 +142,7 @@ const output = execSync(
 
           const listofsqlrequests = [
             //start the series of transactions, don't save it until the end.
-            'BEGIN;',
+            
             //perform an alias lookup
             `CREATE TABLE IF NOT EXISTS aliased${nameofidemp} AS (SELECT * from init${nameofidemp} LEFT JOIN aliastable ON init${nameofidemp}.vendor_name = aliastable.input);`,
             `DROP TABLE IF EXISTS losangelescheckbooknew;`,
@@ -160,19 +160,37 @@ const output = execSync(
               //drop the init table
               `DROP TABLE IF EXISTS init${nameofidemp};`,
               `DROP TABLE IF EXISTS aliased${nameofidemp};`,
-              //drop the old table
-              `DROP TABLE IF EXISTS losangelescheckbook;`,
 
-              `DROP TABLE IF EXISTS vendors_summed;`,
-
+              'BEGIN;',
+            //move the old table out of the way
+            `ALTER TABLE losangelescheckbook RENAME TO losangelescheckbookold;`,
             //rename the new table to the old table
             `ALTER TABLE losangelescheckbooknew RENAME TO losangelescheckbook;`,
-            //create the vendor lookup table
-            `CREATE TABLE IF NOT EXISTS vendor_summed AS (SELECT count(*), sum(dollar_amount), vendor_name FROM losangelescheckbook GROUP BY vendor_name ORDER BY SUM(dollar_amount) desc);`,
-            
-            `COMMIT;`
+              //drop the old table
+              `DROP TABLE losangelescheckbookold;`,
+              //commit the action
+             `COMMIT;`
           ]
           const sqlimport = execSync(
             `${setup} -d postgres -c "${listofsqlrequests.join('')}"`, 
              { encoding: 'utf-8',
              stdio: 'inherit'});  // the default is 'buffer'
+
+                //create the vendor lookup table
+
+                console.log('main table done');
+
+                console.log('making vendors summed');
+
+             const listofsqlindexes = [
+              `CREATE TABLE IF NOT EXISTS vendors_summed_${nameofidemp} AS (SELECT count(*), sum(dollar_amount), vendor_name FROM losangelescheckbook GROUP BY vendor_name ORDER BY SUM(dollar_amount) desc);`,
+              "BEGIN;",
+              `DROP TABLE IF EXISTS vendors_summed_old;`,
+              `ALTER TABLE vendors_summed_${nameofidemp}RENAME TO vendors_summed;`,
+              `COMMIT;`
+             ]
+
+             const sqlmakeindexes = execSync(
+              `${setup} -d postgres -c "${listofsqlindexes.join('')}"`, 
+               { encoding: 'utf-8',
+               stdio: 'inherit'});  // the default is 'buffer'
