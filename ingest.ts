@@ -187,7 +187,10 @@ const output = execSync(
               "BEGIN;",
               `DROP TABLE IF EXISTS vendors_summed_old;`,
               `ALTER TABLE vendors_summed_${nameofidemp} RENAME TO vendors_summed;`,
-              `COMMIT;`
+              `COMMIT;`,
+              'CREATE TABLE IF NOT EXISTS department_summary_new AS (SELECT count(*), sum(dollar_amount), department_name FROM losangelescheckbook GROUP BY department_name ORDER BY SUM(dollar_amount) desc);',
+              `DROP TABLE IF EXISTS department_summary;`,
+              `ALTER TABLE department_summary_new RENAME TO department_summary;`,
              ]
 
              const sqlmakeindexes = execSync(
