@@ -16,7 +16,7 @@ function generateIdempotency() {
 const nameofidemp = generateIdempotency();
 
 const csvname = 'inputs/' + nameofidemp + '.csv';
-
+execSync('[ -d inputs ] || rm -r inputs', { encoding: 'utf-8' });
 const makenewfolder = execSync('[ -d inputs ] || mkdir inputs', { encoding: 'utf-8' });  // the default is 'buffer'
 console.log('Output was:\n', makenewfolder);
 
