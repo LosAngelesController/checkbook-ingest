@@ -36,14 +36,14 @@ var listofalias = [
 const setup = ` PGPASSWORD=${config.password} psql "sslmode=verify-ca sslrootcert=server-ca.pem sslcert=client-cert.pem sslkey=client-key.pem hostaddr=${config.hostname} port=5432 user=${config.username} dbname=postgres"`
 
 const aliaspostgrs = execSync(
-`${setup} -d postgres -c "${listofalias.join('')}"`, 
+`${setup} -c "${listofalias.join('')}"`, 
 { encoding: 'utf-8',
 stdio: 'inherit'});  // the default is 'buffer'
 
 console.log('start uploading alias table');
 
 const ingestaliasfile = execSync(
-  `${setup} -d postgres -c "\\copy aliastable from './aliases.csv' DELIMITER ',' CSV HEADER;"`, 
+  `${setup} -c "\\copy aliastable from './aliases.csv' DELIMITER ',' CSV HEADER;"`, 
    { encoding: 'utf-8',
    stdio: 'inherit'});  // the default is 'buffer'
 
@@ -58,7 +58,7 @@ const output = execSync(
 
 
      const postgresingest = execSync(
-        `${setup} -d postgres -c "
+        `${setup}  -c "
         
         CREATE TABLE IF NOT EXISTS init${nameofidemp} (
           id_number integer PRIMARY KEY,
@@ -132,7 +132,7 @@ const output = execSync(
          console.log('ingesting into postgres', new Date);
 
          const csvstep2 = execSync(
-          `${setup} -d postgres -c "\\copy init${nameofidemp} from '${csvname}' DELIMITER ',' CSV HEADER;"`, 
+          `${setup}  -c "\\copy init${nameofidemp} from '${csvname}' DELIMITER ',' CSV HEADER;"`, 
            { encoding: 'utf-8',
            stdio: 'inherit'});  // the default is 'buffer'
   
@@ -172,7 +172,7 @@ const output = execSync(
              `COMMIT;`
           ]
           const sqlimport = execSync(
-            `${setup} -d postgres -c "${listofsqlrequests.join('')}"`, 
+            `${setup}  -c "${listofsqlrequests.join('')}"`, 
              { encoding: 'utf-8',
              stdio: 'inherit'});  // the default is 'buffer'
 
@@ -194,6 +194,6 @@ const output = execSync(
              ]
 
              const sqlmakeindexes = execSync(
-              `${setup} -d postgres -c "${listofsqlindexes.join('')}"`, 
+              `${setup}  -c "${listofsqlindexes.join('')}"`, 
                { encoding: 'utf-8',
                stdio: 'inherit'});  // the default is 'buffer'
