@@ -29,7 +29,7 @@ var listofalias = [
   // ensure the table at least exists, if not, create it
 'CREATE TABLE IF NOT EXISTS aliastable (input varchar(255) PRIMARY KEY,showas varchar(255));',
 //insert the alias into the table
-`INSERT INTO aliastable (input, showas) VALUES ('MICROSOFT CORP', 'MICROSOFT CORPORATION') ON CONFLICT DO UPDATE;`,
+`INSERT INTO aliastable (input, showas) VALUES ('MICROSOFT CORP', 'MICROSOFT CORPORATION') ON CONFLICT DO NOTHING;`,
 ]
 
 const setup = `PGPASSWORD=${config.password} psql -U ${config.username} -h ${config.hostname}`
