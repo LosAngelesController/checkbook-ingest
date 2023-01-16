@@ -141,7 +141,7 @@ const output = execSync(
             `CREATE TABLE IF NOT EXISTS aliased${nameofidemp} AS (SELECT * from init${nameofidemp} LEFT JOIN aliastable ON init${nameofidemp}.vendor_name = aliastable.input);`,
             `DROP TABLE IF EXISTS losangelescheckbooknew;`,
             //create the real table
-            `CREATE TABLE IF NOT EXISTS losangelescheckbooknew AS (SELECT * FROM aliased${nameofidemp});`,
+            `CREATE TABLE IF NOT EXISTS losangelescheckbooknew AS (SELECT *, COALESCE ( ProgramID , InterimProgramID ) as 'ProgramID' FROM aliased${nameofidemp});`,
             //rename the aliased table into losangelescheckbook
               //drop the init table
               `DROP TABLE IF EXISTS init${nameofidemp};`,
