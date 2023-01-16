@@ -33,7 +33,7 @@ var listofalias = [
 `INSERT INTO aliastable (input, showas) VALUES ('MICROSOFT CORP', 'MICROSOFT CORPORATION') ON CONFLICT DO NOTHING;`,
 ]
 
-const setup = `PGPASSWORD=${config.password} psql -U ${config.username} -h ${config.hostname}`
+const setup = `PGPASSWORD=${config.password} psql sslmode=verify-ca sslrootcert=server-ca.pem sslcert=client-cert.pem sslkey=client-key.pem -U ${config.username} -h ${config.hostname}`
 
 const aliaspostgrs = execSync(
 `${setup} -d postgres -c "${listofalias.join('')}"`, 
