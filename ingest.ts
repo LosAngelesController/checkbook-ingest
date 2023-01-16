@@ -19,6 +19,29 @@ const csvname = 'inputs/' + nameofidemp + '.csv';
 
 const makenewfolder = execSync('[ -d inputs ] || mkdir inputs', { encoding: 'utf-8' });  // the default is 'buffer'
 console.log('Output was:\n', makenewfolder);
+
+
+
+console.log('making alias table');
+
+
+var listofalias = [
+  // ensure the table at least exists, if not, create it
+'CREATE TABLE IF NOT EXISTS aliastable (input varchar(255) PRIMARY KEY,showas varchar(255));',
+//insert the alias into the table
+`INSERT INTO aliastable (input, showas) VALUES ('MICROSOFT CORP', 'MICROSOFT CORPORATION') ON CONFLICT DO UPDATE;`,
+]
+
+const setup = `PGPASSWORD=${config.password} psql -U ${config.username} -h ${config.hostname}`
+
+
+
+const aliaspostgrs = execSync(
+`${setup} -d postgres -c "${listofalias.join('')}"`, 
+{ encoding: 'utf-8',
+stdio: 'inherit'});  // the default is 'buffer'
+
+console.log('done making alias table');
 if (true){
 const output = execSync(
     'wget https://controllerdata.lacity.org/api/views/pggv-e4fn/rows.csv?accessType=DOWNLOAD -O '
@@ -27,7 +50,6 @@ const output = execSync(
      stdio: 'inherit'});  // the default is 'buffer'
 }
 
-const setup = `PGPASSWORD=${config.password} psql -U ${config.username} -h ${config.hostname}`
 
      const postgresingest = execSync(
         `${setup} -d postgres -c "
@@ -111,18 +133,6 @@ const setup = `PGPASSWORD=${config.password} psql -U ${config.username} -h ${con
 
            console.log(`injest done at ${new Date}`) 
 
-          var listofalias = [
-                        // ensure the table at least exists, if not, create it
-            'CREATE TABLE IF NOT EXISTS aliastable (input varchar(255) PRIMARY KEY,showas varchar(255));',
-            //insert the alias into the table
-            `INSERT INTO aliastable (input, showas) VALUES ('MICROSOFT CORP', 'MICROSOFT CORPORATION');`,
-          ]
-
-          
-         const aliaspostgrs = execSync(
-          `${setup} -d postgres -c "${listofalias.join('')}"`, 
-           { encoding: 'utf-8',
-           stdio: 'inherit'});  // the default is 'buffer'
 
           const listofsqlrequests = [
             //start the series of transactions, don't save it until the end.
