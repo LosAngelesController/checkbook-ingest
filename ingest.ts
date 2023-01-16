@@ -139,6 +139,7 @@ const output = execSync(
             'BEGIN;',
             //perform an alias lookup
             `CREATE TABLE IF NOT EXISTS aliased${nameofidemp} AS (SELECT * from init${nameofidemp} LEFT JOIN aliastable ON init${nameofidemp}.vendor_name = aliastable.input);`,
+            `DROP TABLE IF EXISTS losangelescheckbooknew;`,
             //create the real table
             `CREATE TABLE IF NOT EXISTS losangelescheckbooknew AS (SELECT * FROM aliased${nameofidemp});`,
             //rename the aliased table into losangelescheckbook
@@ -147,8 +148,12 @@ const output = execSync(
               //drop the old table
               `DROP TABLE IF EXISTS losangelescheckbook;`,
 
+              `DROP TABLE IF EXISTS vendors_summed;`,
+
             `ALTER TABLE aliased${nameofidemp} RENAME TO losangelescheckbook;`,
           
+
+            `CREATE TABLE IF NOT EXISTS vendor_summed AS (SELECT count(*), sum(dollar_amount), vendor_name FROM losangelescheckbook GROUP BY vendor_name ORDER BY SUM(dollar_amount) desc);`,
             //create the vendor lookup table
             `COMMIT;`
           ]
