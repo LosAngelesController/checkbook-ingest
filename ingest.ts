@@ -138,7 +138,7 @@ const output = execSync(
             //start the series of transactions, don't save it until the end.
             'BEGIN;',
             //perform an alias lookup
-            `CREATE TABLE IF NOT EXISTS aliased${nameofidemp} AS (SELECT * from init${nameofidemp} LEFT JOIN aliastable ON init${nameofidemp}.vendor_name = aliastable.input)`,
+            `CREATE TABLE IF NOT EXISTS aliased${nameofidemp} AS (SELECT * from init${nameofidemp} LEFT JOIN aliastable ON init${nameofidemp}.vendor_name = aliastable.input);`,
             //create the real table
             `CREATE TABLE IF NOT EXISTS losangelescheckbooknew AS (SELECT * FROM aliased${nameofidemp});`,
             //rename the aliased table into losangelescheckbook
