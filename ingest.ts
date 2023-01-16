@@ -26,6 +26,7 @@ console.log('making alias table');
 
 
 var listofalias = [
+  'DROP TABLE IF EXISTS aliastable;', // drop the table if it exists
   // ensure the table at least exists, if not, create it
 'CREATE TABLE IF NOT EXISTS aliastable (input varchar(255) PRIMARY KEY,showas varchar(255));',
 //insert the alias into the table
@@ -34,12 +35,17 @@ var listofalias = [
 
 const setup = `PGPASSWORD=${config.password} psql -U ${config.username} -h ${config.hostname}`
 
-
-
 const aliaspostgrs = execSync(
 `${setup} -d postgres -c "${listofalias.join('')}"`, 
 { encoding: 'utf-8',
 stdio: 'inherit'});  // the default is 'buffer'
+
+console.log('start uploading alias table');
+
+const ingestaliasfile = execSync(
+  `${setup} -d postgres -c "\\copy aliastable from './aliases.csv' DELIMITER ',' CSV HEADER;"`, 
+   { encoding: 'utf-8',
+   stdio: 'inherit'});  // the default is 'buffer'
 
 console.log('done making alias table');
 if (true){
