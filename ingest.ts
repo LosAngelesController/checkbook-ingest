@@ -31,7 +31,7 @@ var listofalias = [
 'CREATE TABLE IF NOT EXISTS aliastable (input varchar(255) PRIMARY KEY,showas varchar(255));',
 //insert the alias into the table
 `INSERT INTO aliastable (input, showas) VALUES ('MICROSOFT CORP', 'MICROSOFT CORPORATION') ON CONFLICT DO NOTHING;`,
-"CREATE EXTENSION pg_trgm;CREATE EXTENSION btree_gin;"
+"CREATE EXTENSION IF NOT EXISTS pg_trgm;CREATE EXTENSION IF NOT EXISTS btree_gin;"
 ]
 
 const setup = ` PGPASSWORD=${config.password} psql "sslmode=verify-ca sslrootcert=server-ca.pem sslcert=client-cert.pem sslkey=client-key.pem hostaddr=${config.hostname} port=5432 user=${config.username} dbname=postgres"`
