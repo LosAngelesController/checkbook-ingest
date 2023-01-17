@@ -217,10 +217,12 @@ const output = execSync(
 
               const thisyearvendorsummedrequests = [
                 `CREATE TABLE latestyearpervendorsummarynew AS (SELECT count(*), sum(dollar_amount), vendor_name FROM losangelescheckbook WHERE date_part('year', transaction_date) = '${new Date().getFullYear()}' GROUP BY vendor_name ORDER BY SUM(dollar_amount) desc);`,
+                `BEGIN;`,
                 `DROP TABLE IF EXISTS latestyearpervendorsummary;`,
                 `ALTER TABLE latestyearpervendorsummarynew RENAME TO latestyearpervendorsummary;`,
                 `DROP INDEX IF EXISTS latestyearpervendorsummary_vendor_name_idx;`,
-                `CREATE UNIQUE INDEX latestyearpervendorsummary_vendor_name_idx ON latestyearpervendorsummary (vendor_name);`
+                `CREATE UNIQUE INDEX latestyearpervendorsummary_vendor_name_idx ON latestyearpervendorsummary (vendor_name);`,
+                `COMMIT;`
               ]
 
                  executesqlarray(thisyearvendorsummedrequests)
