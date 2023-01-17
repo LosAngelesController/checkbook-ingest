@@ -139,6 +139,13 @@ const output = execSync(
 
            console.log(`injest done at ${new Date}`) 
 
+          function executesqlarray(sqlarray:Array<string>) {
+            execSync(
+              `${setup}  -c "${sqlarray.join('')}"`, 
+               { encoding: 'utf-8',
+               stdio: 'inherit'});  // the default is 'buffer'
+          }
+
 
           const listofsqlrequests = [
             //start the series of transactions, don't save it until the end.
@@ -206,6 +213,8 @@ const output = execSync(
                  { encoding: 'utf-8',
                  stdio: 'inherit'});  // the default is 'buffer'
 
+                 console.log('making this year vendor summary')
+
               const thisyearvendorsummedrequests = [
                 `CREATE TABLE latestyearpervendorsummarynew AS (SELECT count(*), sum(dollar_amount), vendor_name FROM losangelescheckbook WHERE SELECT * FROM losangelescheckbook WHERE date_part('year', transaction_date) = '${new Date().getFullYear()}' GROUP BY vendor_name ORDER BY SUM(dollar_amount) desc);`,
                 `DROP TABLE IF EXISTS latestyearpervendorsummary;`,
@@ -214,7 +223,23 @@ const output = execSync(
                 `CREATE UNIQUE INDEX latestyearpervendorsummary_vendor_name_idx ON latestyearpervendorsummary (vendor_name);`
               ]
 
-              const thisyearvendor = execSync(
-                `${setup}  -c "${thisyearvendorsummedrequests.join('')}"`, 
-                 { encoding: 'utf-8',
-                 stdio: 'inherit'});  // the default is 'buffer'
+                 executesqlarray(thisyearvendorsummedrequests)
+
+                 
+                 console.log('making summary on vendors on main table');
+
+              const maintablevendorsum = [
+                `DROP INDEX IF EXISTS losangelescheckbook_vendor_name_idx;`,
+                `CREATE INDEX losangelescheckbook_vendor_name_idx ON losangelescheckbook USING GIN(vendor_name);`
+              ]
+
+                 executesqlarray(maintablevendorsum);
+
+                 console.log('making summary on departments on main table');
+
+              const maintabledepartmentsum = [
+                `DROP INDEX IF EXISTS losangelescheckbook_department_name_idx;`,
+                `CREATE INDEX losangelescheckbook_department_name_idx ON losangelescheckbook (department_name);`
+              ]
+
+                 executesqlarray(maintablevendorsum);
