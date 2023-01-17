@@ -186,6 +186,8 @@ const output = execSync(
               `CREATE TABLE IF NOT EXISTS vendors_summed_${nameofidemp} AS (SELECT count(*), sum(dollar_amount), vendor_name FROM losangelescheckbook GROUP BY vendor_name ORDER BY SUM(dollar_amount) desc);`,
               `DROP TABLE IF EXISTS vendors_summed;`,
               `ALTER TABLE vendors_summed_${nameofidemp} RENAME TO vendors_summed;`,
+              `DROP INDEX IF EXISTS vendor_summed_vendor_name_idx;`,
+              `CREATE UNIQUE INDEX vendor_summed_vendor_name_idx ON vendor_summed USING gin(vendor_name);`
              ]
 
              const sqlmakeindexes = execSync(
@@ -201,5 +203,18 @@ const output = execSync(
 
                const sqlmakedeptindexes = execSync(
                 `${setup}  -c "${listofsqldeptindexes.join('')}"`, 
+                 { encoding: 'utf-8',
+                 stdio: 'inherit'});  // the default is 'buffer'
+
+              const thisyearvendorsummedrequests = [
+                `CREATE TABLE latestyearpervendorsummarynew AS (SELECT count(*), sum(dollar_amount), vendor_name FROM losangelescheckbook WHERE SELECT * FROM losangelescheckbook WHERE date_part('year', transaction_date) = '${new Date().getFullYear()}' GROUP BY vendor_name ORDER BY SUM(dollar_amount) desc);`,
+                `DROP TABLE IF EXISTS latestyearpervendorsummary;`,
+                `ALTER TABLE latestyearpervendorsummarynew RENAME TO latestyearpervendorsummary;`,
+                `DROP INDEX IF EXISTS latestyearpervendorsummary_vendor_name_idx;`,
+                `CREATE UNIQUE INDEX latestyearpervendorsummary_vendor_name_idx ON latestyearpervendorsummary (vendor_name);`
+              ]
+
+              const thisyearvendor = execSync(
+                `${setup}  -c "${thisyearvendorsummedrequests.join('')}"`, 
                  { encoding: 'utf-8',
                  stdio: 'inherit'});  // the default is 'buffer'
