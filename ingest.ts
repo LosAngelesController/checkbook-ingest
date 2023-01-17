@@ -194,7 +194,7 @@ const output = execSync(
               `DROP TABLE IF EXISTS vendors_summed;`,
               `ALTER TABLE vendors_summed_${nameofidemp} RENAME TO vendors_summed;`,
               `DROP INDEX IF EXISTS vendor_summed_vendor_name_idx;`,
-              `CREATE UNIQUE INDEX vendor_summed_vendor_name_idx ON vendor_summed USING gin(vendor_name);`
+              `CREATE UNIQUE INDEX vendor_summed_vendor_name_idx ON vendor_summed (vendor_name);`
              ]
 
              const sqlmakeindexes = execSync(
