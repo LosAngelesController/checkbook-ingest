@@ -226,23 +226,34 @@ const output = execSync(
                 `COMMIT;`
               ]
 
-                 executesqlarray(thisyearvendorsummedrequests)
-
+                 executesqlarray(thisyearvendorsummedrequests);
                  
                  console.log('making summary on vendors on main table');
 
               const maintablevendorsum = [
+                `BEGIN;`,
                 `DROP INDEX IF EXISTS losangelescheckbook_vendor_name_idx;`,
-                `CREATE INDEX losangelescheckbook_vendor_name_idx ON losangelescheckbook USING GIN(vendor_name);`
+                `CREATE INDEX losangelescheckbook_vendor_name_idx ON losangelescheckbook USING GIN(vendor_name);`,
+                `COMMIT;`
               ]
 
                  executesqlarray(maintablevendorsum);
 
+                 console.log('making btree vendor index');
+
+                  const maintablevendorsumbtree = ['BEGIN;',
+                  `DROP INDEX IF EXISTS losangelescheckbook_vendor_name_btree_idx;`,
+                  `CREATE INDEX losangelescheckbook_vendor_name_btree_idx ON losangelescheckbook USING BTREE(vendor_name);`,
+                  `COMMIT;`
+                ]
+
                  console.log('making summary on departments on main table');
 
               const maintabledepartmentsum = [
+                `BEGIN`,
                 `DROP INDEX IF EXISTS losangelescheckbook_department_name_idx;`,
-                `CREATE INDEX losangelescheckbook_department_name_idx ON losangelescheckbook (department_name);`
+                `CREATE INDEX losangelescheckbook_department_name_idx ON losangelescheckbook (department_name);`,
+                `COMMIT;`
               ]
 
                  executesqlarray(maintablevendorsum);
