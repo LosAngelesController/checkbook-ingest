@@ -29,12 +29,14 @@ console.log('making alias table');
 
 
 var listofalias = [
+  'BEGIN;',
   'DROP TABLE IF EXISTS aliastable;', // drop the table if it exists
   // ensure the table at least exists, if not, create it
 'CREATE TABLE IF NOT EXISTS aliastable (input varchar(255) PRIMARY KEY,showas varchar(255));',
 //insert the alias into the table
 `INSERT INTO aliastable (input, showas) VALUES ('MICROSOFT CORP', 'MICROSOFT CORPORATION') ON CONFLICT DO NOTHING;`,
-"CREATE EXTENSION IF NOT EXISTS pg_trgm;CREATE EXTENSION IF NOT EXISTS btree_gin;"
+"CREATE EXTENSION IF NOT EXISTS pg_trgm;CREATE EXTENSION IF NOT EXISTS btree_gin;",
+'COMMIT;'
 ]
 
 const setup = ` PGPASSWORD=${config.password} psql "sslmode=verify-ca sslrootcert=server-ca.pem sslcert=client-cert.pem sslkey=client-key.pem hostaddr=${config.hostname} port=5432 user=${config.username} dbname=postgres"`
@@ -175,6 +177,10 @@ const output = execSync(
               `CREATE INDEX losangelescheckbook_department_name_idx_${nameofidemp} ON losangelescheckbooknew USING BTREE (department_name);`,
               `CREATE INDEX losangelescheckbook_vendor_name_btree_idx_${nameofidemp} ON losangelescheckbooknew USING BTREE (vendor_name);`,
               `CREATE INDEX losangelescheckbook_vendor_name_idx_${nameofidemp} ON losangelescheckbooknew USING GIN(vendor_name);`,
+              `CREATE INDEX dateasc${nameofidemp} on losangelescheckbooknew USING BTREE (transaction_date asc);`,
+              `CREATE INDEX datedesc${nameofidemp} on losangelescheckbooknew USING BTREE (transaction_date desc);`,
+              `CREATE INDEX amountdesc${nameofidemp} on losangelescheckbooknew USING BTREE (dollar_amount desc);`,
+              `CREATE INDEX amountasc${nameofidemp} on losangelescheckbooknew USING BTREE (dollar_amount asc);`,
               'BEGIN;',
             //move the old table out of the way
             `ALTER TABLE losangelescheckbook RENAME TO losangelescheckbookold;`,
@@ -197,6 +203,7 @@ const output = execSync(
               "BEGIN;",
               `CREATE TABLE IF NOT EXISTS vendors_summed_${nameofidemp} AS (SELECT count(*), sum(dollar_amount), vendor_name FROM losangelescheckbook GROUP BY vendor_name ORDER BY SUM(dollar_amount) desc);`,
               `CREATE UNIQUE INDEX vendor_summed_vendor_name_idx_${nameofidemp} ON vendors_summed_${nameofidemp} (vendor_name);`,
+              `CREATE INDEX vendorsummed_gin_${nameofidemp} ON vendors_summed_${nameofidemp} USING GIN(vendor_name);`,
               `DROP TABLE IF EXISTS vendors_summed;`,
               `ALTER TABLE vendors_summed_${nameofidemp} RENAME TO vendors_summed;`,
               `COMMIT;`
@@ -207,6 +214,7 @@ const output = execSync(
                const listofsqldeptindexes = [
                 `BEGIN;`,
                 `CREATE TABLE IF NOT EXISTS department_summary_new_${nameofidemp} AS (SELECT count(*), sum(dollar_amount), department_name FROM losangelescheckbook GROUP BY department_name ORDER BY SUM(dollar_amount) desc);`,
+                `CREATE UNIQUE INDEX department_summary_department_name_idx_${nameofidemp} ON department_summary_new_${nameofidemp} (department_name);`,
                 `DROP TABLE IF EXISTS department_summary;`,
                 `ALTER TABLE department_summary_new_${nameofidemp} RENAME TO department_summary;`,
                 `COMMIT;`
@@ -220,9 +228,10 @@ const output = execSync(
                 `CREATE TABLE latestyearpervendorsummarynew${nameofidemp} AS (SELECT count(*), sum(dollar_amount), vendor_name FROM losangelescheckbook WHERE date_part('year', transaction_date) = '${new Date().getFullYear()}' GROUP BY vendor_name ORDER BY SUM(dollar_amount) desc);`,
                 
                 `CREATE UNIQUE INDEX latestyearpervendorsummary_vendor_name_idx_${nameofidemp} ON latestyearpervendorsummarynew${nameofidemp} (vendor_name);`,
+                `CREATE INDEX latestyearvendorsummary_gin_${nameofidemp} ON latestyearpervendorsummarynew${nameofidemp} USING GIN(vendor_name);`,
                 `BEGIN;`,
                 `DROP TABLE IF EXISTS latestyearpervendorsummary;`,
-                `ALTER TABLE latestyearpervendorsummarynew RENAME TO latestyearpervendorsummary;`,
+                `ALTER TABLE latestyearpervendorsummarynew${nameofidemp} RENAME TO latestyearpervendorsummary;`,
                 `COMMIT;`
               ]
 
