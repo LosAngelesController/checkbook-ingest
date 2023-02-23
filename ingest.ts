@@ -191,7 +191,7 @@ const output = execSync(
                 console.log('making vendors summed');
 
              const listofsqlindexes = [
-              "BEGIN",
+              "BEGIN;",
               `CREATE TABLE IF NOT EXISTS vendors_summed_${nameofidemp} AS (SELECT count(*), sum(dollar_amount), vendor_name FROM losangelescheckbook GROUP BY vendor_name ORDER BY SUM(dollar_amount) desc);`,
               `DROP TABLE IF EXISTS vendors_summed;`,
               `ALTER TABLE vendors_summed_${nameofidemp} RENAME TO vendors_summed;`,
