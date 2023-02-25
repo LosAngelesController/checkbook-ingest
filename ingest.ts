@@ -179,6 +179,8 @@ const output = execSync(
               `CREATE INDEX losangelescheckbook_vendor_name_idx_${nameofidemp} ON losangelescheckbooknew USING GIN(vendor_name);`,
               `CREATE INDEX dateasc${nameofidemp} on losangelescheckbooknew USING BTREE (transaction_date asc);`,
               `CREATE INDEX datedesc${nameofidemp} on losangelescheckbooknew USING BTREE (transaction_date desc);`,
+              `CREATE INDEX amountdesc${nameofidemp} on losangelescheckbooknew USING BTREE (dollar_amount desc);`,
+              `CREATE INDEX amountasc${nameofidemp} on losangelescheckbooknew USING BTREE (dollar_amount asc);`,
               'BEGIN;',
             //move the old table out of the way
             `ALTER TABLE losangelescheckbook RENAME TO losangelescheckbookold;`,
