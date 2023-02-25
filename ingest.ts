@@ -173,7 +173,10 @@ const output = execSync(
               //drop the init table
               `DROP TABLE IF EXISTS init${nameofidemp};`,
               `DROP TABLE IF EXISTS aliased${nameofidemp};`,
-
+              //stacks of indexes go here
+              `CREATE INDEX losangelescheckbook_department_name_idx_${nameofidemp} ON losangelescheckbooknew USING BTREE (department_name);`,
+              `CREATE INDEX losangelescheckbook_vendor_name_btree_idx_${nameofidemp} ON losangelescheckbooknew USING BTREE (vendor_name);`,
+              `CREATE INDEX losangelescheckbook_vendor_name_idx_${nameofidemp} ON losangelescheckbooknew USING GIN(vendor_name);`,
               'BEGIN;',
             //move the old table out of the way
             `ALTER TABLE losangelescheckbook RENAME TO losangelescheckbookold;`,
@@ -184,10 +187,7 @@ const output = execSync(
               //commit the action
              `COMMIT;`
           ]
-          const sqlimport = execSync(
-            `${setup}  -c "${listofsqlrequests.join('')}"`, 
-             { encoding: 'utf-8',
-             stdio: 'inherit'});  // the default is 'buffer'
+          executesqlarray(listofsqlrequests);
 
                 //create the vendor lookup table
 
@@ -198,74 +198,44 @@ const output = execSync(
              const listofsqlindexes = [
               "BEGIN;",
               `CREATE TABLE IF NOT EXISTS vendors_summed_${nameofidemp} AS (SELECT count(*), sum(dollar_amount), vendor_name FROM losangelescheckbook GROUP BY vendor_name ORDER BY SUM(dollar_amount) desc);`,
+              `CREATE UNIQUE INDEX vendor_summed_vendor_name_idx_${nameofidemp} ON vendors_summed_${nameofidemp} (vendor_name);`,
+              `CREATE INDEX vendorsummed_gin_${nameofidemp} ON vendors_summed_${nameofidemp} USING GIN(vendor_name);`,
               `DROP TABLE IF EXISTS vendors_summed;`,
               `ALTER TABLE vendors_summed_${nameofidemp} RENAME TO vendors_summed;`,
-              `DROP INDEX IF EXISTS vendor_summed_vendor_name_idx;`,
-              `CREATE UNIQUE INDEX vendor_summed_vendor_name_idx ON vendors_summed (vendor_name);`,
               `COMMIT;`
              ]
 
-             const sqlmakeindexes = execSync(
-              `${setup}  -c "${listofsqlindexes.join('')}"`, 
-               { encoding: 'utf-8',
-               stdio: 'inherit'});  // the default is 'buffer'
+             executesqlarray(listofsqlindexes);
 
                const listofsqldeptindexes = [
-                "BEGIN;",
-                'CREATE TABLE IF NOT EXISTS department_summary_new AS (SELECT count(*), sum(dollar_amount), department_name FROM losangelescheckbook GROUP BY department_name ORDER BY SUM(dollar_amount) desc);',
+                `BEGIN;`,
+                `CREATE TABLE IF NOT EXISTS department_summary_new_${nameofidemp} AS (SELECT count(*), sum(dollar_amount), department_name FROM losangelescheckbook GROUP BY department_name ORDER BY SUM(dollar_amount) desc);`,
+                `CREATE UNIQUE INDEX department_summary_department_name_idx_${nameofidemp} ON department_summary_new_${nameofidemp} (department_name);`,
                 `DROP TABLE IF EXISTS department_summary;`,
-                `ALTER TABLE department_summary_new RENAME TO department_summary;`,
-                "COMMIT;"
+                `ALTER TABLE department_summary_new_${nameofidemp} RENAME TO department_summary;`,
+                `COMMIT;`
                ]
 
-               const sqlmakedeptindexes = execSync(
-                `${setup}  -c "${listofsqldeptindexes.join('')}"`, 
-                 { encoding: 'utf-8',
-                 stdio: 'inherit'});  // the default is 'buffer'
+              executesqlarray(listofsqldeptindexes);
 
                  console.log('making this year vendor summary')
 
               const thisyearvendorsummedrequests = [
-                `DROP TABLE IF EXISTS latestyearpervendorsummarynew;`,
-                `CREATE TABLE latestyearpervendorsummarynew AS (SELECT count(*), sum(dollar_amount), vendor_name FROM losangelescheckbook WHERE date_part('year', transaction_date) = '${new Date().getFullYear()}' GROUP BY vendor_name ORDER BY SUM(dollar_amount) desc);`,
-                `CREATE UNIQUE INDEX latestyearpervendorsummary_vendor_name_idx_${nameofidemp} ON latestyearpervendorsummarynew (vendor_name);`,
+                `CREATE TABLE latestyearpervendorsummarynew${nameofidemp} AS (SELECT count(*), sum(dollar_amount), vendor_name FROM losangelescheckbook WHERE date_part('year', transaction_date) = '${new Date().getFullYear()}' GROUP BY vendor_name ORDER BY SUM(dollar_amount) desc);`,
+                
+                `CREATE UNIQUE INDEX latestyearpervendorsummary_vendor_name_idx_${nameofidemp} ON latestyearpervendorsummarynew${nameofidemp} (vendor_name);`,
+                `CREATE INDEX latestyearvendorsummary_gin_${nameofidemp} ON latestyearpervendorsummarynew${nameofidemp} USING GIN(vendor_name);`,
                 `BEGIN;`,
                 `DROP TABLE IF EXISTS latestyearpervendorsummary;`,
-                `ALTER TABLE latestyearpervendorsummarynew RENAME TO latestyearpervendorsummary;`,
+                `ALTER TABLE latestyearpervendorsummarynew${nameofidemp} RENAME TO latestyearpervendorsummary;`,
                 `COMMIT;`
               ]
 
                  executesqlarray(thisyearvendorsummedrequests);
                  
-                 console.log('making summary on vendors on main table');
+             
 
-              const maintablevendorsum = [
-                `BEGIN;`,
-                `DROP INDEX IF EXISTS losangelescheckbook_vendor_name_idx;`,
-                `CREATE INDEX losangelescheckbook_vendor_name_idx ON losangelescheckbook USING GIN(vendor_name);`,
-                `COMMIT;`
-              ]
+               
 
-                 executesqlarray(maintablevendorsum);
-
-                 console.log('making btree vendor index');
-
-                  const maintablevendorsumbtree = ['BEGIN;',
-                  `DROP INDEX IF EXISTS losangelescheckbook_vendor_name_btree_idx;`,
-                  `CREATE INDEX losangelescheckbook_vendor_name_btree_idx ON losangelescheckbook USING BTREE(vendor_name);`,
-                  `COMMIT;`
-                ]
-
-                 console.log('making index department on main table');
-
-              const maintabledepartmentsum = [
-                `BEGIN`,
-                `DROP INDEX IF EXISTS losangelescheckbook_department_name_idx;`,
-                `CREATE INDEX losangelescheckbook_department_name_idx ON losangelescheckbook (department_name);`,
-                `COMMIT;`
-              ]
-
-                 executesqlarray(maintablevendorsum);
-
-                 console.log('finished making department index');
+            
   }
