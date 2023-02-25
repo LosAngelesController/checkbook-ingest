@@ -249,7 +249,7 @@ const output = execSync(
                   `COMMIT;`
                 ]
 
-                 console.log('making summary on departments on main table');
+                 console.log('making index department on main table');
 
               const maintabledepartmentsum = [
                 `BEGIN`,
@@ -259,3 +259,5 @@ const output = execSync(
               ]
 
                  executesqlarray(maintablevendorsum);
+
+                 console.log('finished making department index');
