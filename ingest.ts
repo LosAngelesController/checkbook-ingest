@@ -29,12 +29,14 @@ console.log('making alias table');
 
 
 var listofalias = [
+  'BEGIN;',
   'DROP TABLE IF EXISTS aliastable;', // drop the table if it exists
   // ensure the table at least exists, if not, create it
 'CREATE TABLE IF NOT EXISTS aliastable (input varchar(255) PRIMARY KEY,showas varchar(255));',
 //insert the alias into the table
 `INSERT INTO aliastable (input, showas) VALUES ('MICROSOFT CORP', 'MICROSOFT CORPORATION') ON CONFLICT DO NOTHING;`,
-"CREATE EXTENSION IF NOT EXISTS pg_trgm;CREATE EXTENSION IF NOT EXISTS btree_gin;"
+"CREATE EXTENSION IF NOT EXISTS pg_trgm;CREATE EXTENSION IF NOT EXISTS btree_gin;",
+'COMMIT;'
 ]
 
 const setup = ` PGPASSWORD=${config.password} psql "sslmode=verify-ca sslrootcert=server-ca.pem sslcert=client-cert.pem sslkey=client-key.pem hostaddr=${config.hostname} port=5432 user=${config.username} dbname=postgres"`
@@ -209,9 +211,11 @@ const output = execSync(
                stdio: 'inherit'});  // the default is 'buffer'
 
                const listofsqldeptindexes = [
+                "BEGIN;",
                 'CREATE TABLE IF NOT EXISTS department_summary_new AS (SELECT count(*), sum(dollar_amount), department_name FROM losangelescheckbook GROUP BY department_name ORDER BY SUM(dollar_amount) desc);',
                 `DROP TABLE IF EXISTS department_summary;`,
-                `ALTER TABLE department_summary_new RENAME TO department_summary;`
+                `ALTER TABLE department_summary_new RENAME TO department_summary;`,
+                "COMMIT;"
                ]
 
                const sqlmakedeptindexes = execSync(
@@ -222,12 +226,12 @@ const output = execSync(
                  console.log('making this year vendor summary')
 
               const thisyearvendorsummedrequests = [
+                `DROP TABLE IF EXISTS latestyearpervendorsummarynew;`,
                 `CREATE TABLE latestyearpervendorsummarynew AS (SELECT count(*), sum(dollar_amount), vendor_name FROM losangelescheckbook WHERE date_part('year', transaction_date) = '${new Date().getFullYear()}' GROUP BY vendor_name ORDER BY SUM(dollar_amount) desc);`,
+                `CREATE UNIQUE INDEX latestyearpervendorsummary_vendor_name_idx_${nameofidemp} ON latestyearpervendorsummarynew (vendor_name);`,
                 `BEGIN;`,
                 `DROP TABLE IF EXISTS latestyearpervendorsummary;`,
                 `ALTER TABLE latestyearpervendorsummarynew RENAME TO latestyearpervendorsummary;`,
-                `DROP INDEX IF EXISTS latestyearpervendorsummary_vendor_name_idx;`,
-                `CREATE UNIQUE INDEX latestyearpervendorsummary_vendor_name_idx ON latestyearpervendorsummary (vendor_name);`,
                 `COMMIT;`
               ]
 
