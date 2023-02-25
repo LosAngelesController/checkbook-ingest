@@ -13,6 +13,8 @@ function generateIdempotency() {
     })}`;
   }
 
+ export function main () {
+    
 const nameofidemp = generateIdempotency();
 
 const csvname = 'inputs/' + nameofidemp + '.csv';
@@ -23,6 +25,7 @@ console.log('Output was:\n', makenewfolder);
 
 
 console.log('making alias table');
+
 
 
 var listofalias = [
@@ -261,3 +264,4 @@ const output = execSync(
                  executesqlarray(maintablevendorsum);
 
                  console.log('finished making department index');
+  }
