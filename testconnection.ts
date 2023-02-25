@@ -17,4 +17,4 @@ const setup = ` PGPASSWORD=${config.password} psql "sslmode=verify-ca sslrootcer
                stdio: 'inherit'});  // the default is 'buffer'
           }
 
-            executesqlarray(["SELECT GETDATE()"]);
+            executesqlarray(["SELECT NOW()"]);
