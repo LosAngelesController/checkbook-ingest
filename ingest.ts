@@ -23,7 +23,6 @@ const makenewfolder = execSync('[ -d inputs ] || mkdir inputs', { encoding: 'utf
 console.log('Output was:\n', makenewfolder);
 
 
-
 console.log('making alias table');
 
 
