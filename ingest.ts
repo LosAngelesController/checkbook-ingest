@@ -162,11 +162,12 @@ const output = execSync(
             `CREATE TABLE IF NOT EXISTS losangelescheckbooknew AS (SELECT *, COALESCE ( showas,vendor_name ) as vendor_name_new FROM aliased${nameofidemp});`,
 
             //delete column vendor_name
-            `ALTER TABLE losangelescheckbooknew DROP COLUMN vendor_name;`,
+           // `ALTER TABLE losangelescheckbooknew DROP COLUMN vendor_name;`,
             `ALTER TABLE losangelescheckbooknew DROP COLUMN showas;`,
             `ALTER TABLE losangelescheckbooknew DROP COLUMN input;`,
 
             //rename the column vendor_name_new to vendor_name
+            `ALTER TABLE losangelescheckbooknew RENAME COLUMN vendor_name TO vendor_name_original;`,
             `ALTER TABLE losangelescheckbooknew RENAME COLUMN vendor_name_new TO vendor_name;`,
             //rename the aliased table into losangelescheckbook
               //drop the init table
@@ -201,14 +202,28 @@ const output = execSync(
              const listofsqlindexes = [
               "BEGIN;",
               `CREATE TABLE IF NOT EXISTS vendors_summed_${nameofidemp} AS (SELECT count(*), sum(dollar_amount), vendor_name FROM losangelescheckbook GROUP BY vendor_name ORDER BY SUM(dollar_amount) desc);`,
-              `CREATE UNIQUE INDEX vendor_summed_vendor_name_idx_${nameofidemp} ON vendors_summed_${nameofidemp} (vendor_name);`,
-              `CREATE INDEX vendorsummed_gin_${nameofidemp} ON vendors_summed_${nameofidemp} USING GIN(vendor_name);`,
+              `CREATE UNIQUE INDEX btree${generateIdempotency()} ON vendors_summed_${nameofidemp} (vendor_name);`,
+              `CREATE INDEX gin_${generateIdempotency()} ON vendors_summed_${nameofidemp} USING GIN(vendor_name);`,
               `DROP TABLE IF EXISTS vendors_summed;`,
               `ALTER TABLE vendors_summed_${nameofidemp} RENAME TO vendors_summed;`,
               `COMMIT;`
              ]
 
              executesqlarray(listofsqlindexes);
+
+             const witholdtablename = `vendors_summedwithold_${nameofidemp}`
+
+             const listofsearchsqlindexes = [
+              "BEGIN;",
+              `CREATE TABLE IF NOT EXISTS ${witholdtablename} AS (SELECT count(*), sum(dollar_amount), vendor_name, vendor_name_original FROM losangelescheckbook GROUP BY (vendor_name,vendor_name_original) ORDER BY SUM(dollar_amount) desc);`,
+              `CREATE INDEX ${generateIdempotency()} ON ${witholdtablename} USING GIN(vendor_name);`,
+              `CREATE INDEX ${generateIdempotency()} ON ${witholdtablename} USING GIN(vendor_name_original);`,
+              `DROP TABLE IF EXISTS vendors_summedwithold;`,
+              `ALTER TABLE ${witholdtablename} RENAME TO vendors_summedwithold;`,
+              `COMMIT;`
+             ]
+
+             executesqlarray(listofsearchsqlindexes);
 
                const listofsqldeptindexes = [
                 `BEGIN;`,
