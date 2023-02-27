@@ -12,7 +12,14 @@ function generateIdempotency() {
       capitalization: 'lowercase'
     })}`;
   }
-
+  
+  function shortIdempotency() {
+    return `${randomstring.generate({
+      length: 7,
+      charset: 'alphabetic',
+      capitalization: 'lowercase'
+    })}`;
+  }
  export function main () {
     
 const nameofidemp = generateIdempotency();
@@ -202,8 +209,8 @@ const output = execSync(
              const listofsqlindexes = [
               "BEGIN;",
               `CREATE TABLE IF NOT EXISTS vendors_summed_${nameofidemp} AS (SELECT count(*), sum(dollar_amount), vendor_name FROM losangelescheckbook GROUP BY vendor_name ORDER BY SUM(dollar_amount) desc);`,
-              `CREATE UNIQUE INDEX btree${generateIdempotency()} ON vendors_summed_${nameofidemp} (vendor_name);`,
-              `CREATE INDEX gin_${generateIdempotency()} ON vendors_summed_${nameofidemp} USING GIN(vendor_name);`,
+              `CREATE UNIQUE INDEX btree${shortIdempotency()} ON vendors_summed_${nameofidemp} (vendor_name);`,
+              `CREATE INDEX gin_${shortIdempotency()} ON vendors_summed_${nameofidemp} USING GIN(vendor_name);`,
               `DROP TABLE IF EXISTS vendors_summed;`,
               `ALTER TABLE vendors_summed_${nameofidemp} RENAME TO vendors_summed;`,
               `COMMIT;`
@@ -211,13 +218,13 @@ const output = execSync(
 
              executesqlarray(listofsqlindexes);
 
-             const witholdtablename = `vendors_summedwithold_${nameofidemp}`
+             const witholdtablename = `vendors_summedwithold_${shortIdempotency()}`
 
              const listofsearchsqlindexes = [
               "BEGIN;",
               `CREATE TABLE IF NOT EXISTS ${witholdtablename} AS (SELECT count(*), sum(dollar_amount), vendor_name, vendor_name_original FROM losangelescheckbook GROUP BY (vendor_name,vendor_name_original) ORDER BY SUM(dollar_amount) desc);`,
-              `CREATE INDEX ${generateIdempotency()} ON ${witholdtablename} USING GIN(vendor_name);`,
-              `CREATE INDEX ${generateIdempotency()} ON ${witholdtablename} USING GIN(vendor_name_original);`,
+              `CREATE INDEX ${shortIdempotency()} ON ${witholdtablename} USING GIN(vendor_name);`,
+              `CREATE INDEX ${shortIdempotency()} ON ${witholdtablename} USING GIN(vendor_name_original);`,
               `DROP TABLE IF EXISTS vendors_summedwithold;`,
               `ALTER TABLE ${witholdtablename} RENAME TO vendors_summedwithold;`,
               `COMMIT;`
