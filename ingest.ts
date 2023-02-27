@@ -240,7 +240,7 @@ const output = execSync(
 
               const listofsearchsqlindexes2 = [
                 "BEGIN;",
-                `CREATE TABLE IF NOT EXISTS ${searchvendorstable} AS (SELECT vendor_name, SUM(dollar_amount), COUNT(*), array_agg( DISTINCT vendor_name_original) as vendor_old FROM losangelescheckbook GROUP BY vendor_name ORDER BY SUM(dollar_amount))`,
+                `CREATE TABLE IF NOT EXISTS ${searchvendorstable} AS (SELECT vendor_name, SUM(dollar_amount), COUNT(*), array_agg( DISTINCT vendor_name_original) as vendor_old FROM losangelescheckbook GROUP BY vendor_name ORDER BY SUM(dollar_amount));`,
                 `CREATE INDEX ${shortIdempotency()} ON ${searchvendorstable} USING GIN(vendor_name);`,
                 `CREATE INDEX ${shortIdempotency()} ON ${searchvendorstable} USING GIN(vendor_old);`,
                 `DROP TABLE IF EXISTS searchvendors;`,
