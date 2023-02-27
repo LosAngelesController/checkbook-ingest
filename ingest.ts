@@ -166,7 +166,9 @@ const output = execSync(
             `CREATE TABLE IF NOT EXISTS aliased${nameofidemp} AS (SELECT * from init${nameofidemp} LEFT JOIN aliastable ON init${nameofidemp}.vendor_name = aliastable.input);`,
             `DROP TABLE IF EXISTS losangelescheckbooknew;`,
             //create the real table
-            `CREATE TABLE IF NOT EXISTS losangelescheckbooknew AS (SELECT *, COALESCE ( showas,vendor_name ) as vendor_name_new FROM aliased${nameofidemp});`,
+            `CREATE TABLE IF NOT EXISTS losangelescheckbooknew AS (SELECT *,
+              DATE_PART('YEAR', transaction_date) as year ,
+              COALESCE ( showas,vendor_name ) as vendor_name_new FROM aliased${nameofidemp});`,
 
             //delete column vendor_name
            // `ALTER TABLE losangelescheckbooknew DROP COLUMN vendor_name;`,
@@ -232,6 +234,25 @@ const output = execSync(
 
              executesqlarray(listofsearchsqlindexes);
 
+             console.log('making search table for vendors');
+
+             const searchvendorstable = `searchvendors_${shortIdempotency()}`
+
+              const listofsearchsqlindexes2 = [
+                "BEGIN;",
+                `CREATE TABLE IF NOT EXISTS ${searchvendorstable} AS (SELECT vendor_name, SUM(dollar_amount), COUNT(*), array_agg( DISTINCT vendor_name_original) as vendor_old FROM losangelescheckbook GROUP BY vendor_name ORDER BY SUM(dollar_amount))`,
+                `CREATE INDEX ${shortIdempotency()} ON ${searchvendorstable} USING GIN(vendor_name);`,
+                `CREATE INDEX ${shortIdempotency()} ON ${searchvendorstable} USING GIN(vendor_old);`,
+                `DROP TABLE IF EXISTS searchvendors;`,
+                `ALTER TABLE ${searchvendorstable} RENAME TO searchvendors;`,
+                `COMMIT;`
+              ]
+
+              executesqlarray(listofsearchsqlindexes2);
+              console.log('done making vendor search table');
+
+              console.log('making department summaries');
+
                const listofsqldeptindexes = [
                 `BEGIN;`,
                 `CREATE TABLE IF NOT EXISTS department_summary_new_${nameofidemp} AS (SELECT count(*), sum(dollar_amount), department_name FROM losangelescheckbook GROUP BY department_name ORDER BY SUM(dollar_amount) desc);`,
@@ -242,6 +263,23 @@ const output = execSync(
                ]
 
               executesqlarray(listofsqldeptindexes);
+
+              console.log('making department by year summaries');
+
+              const byyeardepttable = `department_summary_by_year_${shortIdempotency()}`
+
+              const listofsqldeptbyyearindexes = [
+               `BEGIN;`,
+               `CREATE TABLE IF NOT EXISTS ${byyeardepttable} AS (SELECT count(*), sum(dollar_amount), department_name, year FROM losangelescheckbook GROUP BY (department_name, year) ORDER BY SUM(dollar_amount) desc);`,
+               `CREATE INDEX ${shortIdempotency} ON ${byyeardepttable} (department_name);`,
+               `CREATE INDEX ${shortIdempotency} ON ${byyeardepttable} GIN(department_name);`,
+                `CREATE INDEX ${shortIdempotency} ON ${byyeardepttable} (year);`,
+               `DROP TABLE IF EXISTS department_summary_by_year;`,
+               `ALTER TABLE ${byyeardepttable} RENAME TO department_summary_by_year;`,
+               `COMMIT;`
+              ]
+
+             executesqlarray(listofsqldeptbyyearindexes);
 
                  console.log('making this year vendor summary')
 
@@ -257,6 +295,8 @@ const output = execSync(
               ]
 
                  executesqlarray(thisyearvendorsummedrequests);
+
+                 console.log('done making this year vendor summary')
                  
              
 
