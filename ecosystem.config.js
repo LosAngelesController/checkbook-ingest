@@ -1,7 +1,6 @@
 module.exports = {
     apps : [{
       name   : "checkbook-ingest",
-      script : "ingest.ts",
-      interpreter: "ts-node",
+      script : "node_modules/ts-node/dist/index.js ingest.ts",
     }]
   }
