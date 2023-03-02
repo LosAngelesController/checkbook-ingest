@@ -291,7 +291,7 @@ const output = execSync(
                `BEGIN;`,
                `CREATE TABLE IF NOT EXISTS ${byyeardepttable} AS (SELECT count(*), sum(dollar_amount), department_name, year FROM losangelescheckbook GROUP BY (department_name, year) ORDER BY SUM(dollar_amount) desc);`,
                `CREATE INDEX ${shortIdempotency()} ON ${byyeardepttable} (department_name);`,
-               `CREATE INDEX ${shortIdempotency()} ON ${byyeardepttable} GIN(department_name);`,
+               `CREATE INDEX ${shortIdempotency()} ON ${byyeardepttable} USING GIN(department_name);`,
                 `CREATE INDEX ${shortIdempotency()} ON ${byyeardepttable} (year);`,
                `DROP TABLE IF EXISTS department_summary_by_year;`,
                `ALTER TABLE ${byyeardepttable} RENAME TO department_summary_by_year;`,
