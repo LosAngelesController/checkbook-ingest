@@ -323,7 +323,7 @@ const output = execSync(
                  
                  const listofsqlrequestsmetainfo2 = [
                   "BEGIN;",
-                  `CREATE TABLE IF NOT EXISTS dbupdateinfo (timeoffiledownload = ${timeofdownload}, lastuploaded timestamp, lastindexed timestamp, dbname varchar(255), filesize bigint);`,
+                  `CREATE TABLE IF NOT EXISTS dbupdateinfo (timeoffiledownload timestamp, lastuploaded timestamp, lastindexed timestamp, dbname varchar(255), filesize bigint);`,
                   // update the time, not insert
                   `UPDATE dbupdateinfo SET lastindexed = now() WHERE dbname = 'checkbook';`,
                   `COMMIT;`
