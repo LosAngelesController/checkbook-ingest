@@ -61,7 +61,7 @@ const ingestaliasfile = execSync(
    { encoding: 'utf-8',
    stdio: 'inherit'});  // the default is 'buffer'
      
-     const timeofdownload = new Date().toISOString();
+     const timeofdownload = new Date().toISOString().replace('T'," ").replace("Z", "")
 
 console.log('done making alias table');
 if (true){
