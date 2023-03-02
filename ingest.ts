@@ -212,8 +212,18 @@ const output = execSync(
      
      
                 console.log('make db update times');
+
+                //make an sql table with columns lastuploaded (a datetime column), lastindexed (a datetime column), dbname (string), and filesize (bigint)
+
+                const listofsqlrequestsmetainfo = [
+                  "BEGIN;",
+                  `CREATE TABLE IF NOT EXISTS dbupdateinfo (timeoffiledownload timestamp, lastuploaded timestamp, lastindexed timestamp, dbname varchar(255), filesize bigint);`,
+                  // update the time, not insert
+                  `UPDATE dbupdateinfo SET timeoffiledownload = ${timeofdownload}, lastuploaded = now(), filesize = ${sizeoffile} WHERE dbname = 'checkbook';`,
+                  `COMMIT;`
+                ]
      
-              
+                executesqlarray(listofsqlrequestsmetainfo);
 
                 console.log('making vendors summed');
 
@@ -309,8 +319,17 @@ const output = execSync(
                  console.log('done making this year vendor summary')
                  
      
+                  console.log('last postgres meta update info')
                  
-
+                 const listofsqlrequestsmetainfo2 = [
+                  "BEGIN;",
+                  `CREATE TABLE IF NOT EXISTS dbupdateinfo (timeoffiledownload = ${timeofdownload}, lastuploaded timestamp, lastindexed timestamp, dbname varchar(255), filesize bigint);`,
+                  // update the time, not insert
+                  `UPDATE dbupdateinfo SET lastindexed = now() WHERE dbname = 'checkbook';`,
+                  `COMMIT;`
+                ]
+     
+                executesqlarray(listofsqlrequestsmetainfo2);
                
 
             
