@@ -217,9 +217,8 @@ const output = execSync(
 
                 const listofsqlrequestsmetainfo = [
                   "BEGIN;",
-                  `CREATE TABLE IF NOT EXISTS dbupdateinfo (timeoffiledownload timestamp, lastuploaded timestamp, lastindexed timestamp, dbname varchar(255), filesize bigint);`,
-                  // update the time, not insert
-                  `UPDATE dbupdateinfo SET timeoffiledownload = '${timeofdownload}', lastuploaded = now(), filesize = ${sizeoffile} WHERE dbname = 'checkbook';`,
+                  `CREATE TABLE IF NOT EXISTS dbupdateinfo (timeoffiledownload timestamp, lastuploaded timestamp, lastindexed timestamp, dbname varchar(255)  PRIMARY KEY, filesize bigint);`,
+                  `INSERT INTO dbupdateinfo (timeoffiledownload, lastuploaded, dbname, filesize) VALUES ('${timeofdownload}', now(), 'checkbook', ${sizeoffile}) ON CONFLICT (dbname) DO UPDATE SET timeoffiledownload = '${timeofdownload}', lastuploaded = now(), filesize = ${sizeoffile};`,
                   `COMMIT;`
                 ]
      
@@ -323,7 +322,7 @@ const output = execSync(
                  
                  const listofsqlrequestsmetainfo2 = [
                   "BEGIN;",
-                  `CREATE TABLE IF NOT EXISTS dbupdateinfo (timeoffiledownload timestamp, lastuploaded timestamp, lastindexed timestamp, dbname varchar(255), filesize bigint);`,
+                  `CREATE TABLE IF NOT EXISTS dbupdateinfo (timeoffiledownload timestamp, lastuploaded timestamp, lastindexed timestamp, dbname varchar(255)  PRIMARY KEY, filesize bigint);`,
                   // update the time, not insert
                   `UPDATE dbupdateinfo SET lastindexed = now() WHERE dbname = 'checkbook';`,
                   `COMMIT;`
