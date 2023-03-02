@@ -219,7 +219,7 @@ const output = execSync(
                   "BEGIN;",
                   `CREATE TABLE IF NOT EXISTS dbupdateinfo (timeoffiledownload timestamp, lastuploaded timestamp, lastindexed timestamp, dbname varchar(255), filesize bigint);`,
                   // update the time, not insert
-                  `UPDATE dbupdateinfo SET timeoffiledownload = ${timeofdownload}, lastuploaded = now(), filesize = ${sizeoffile} WHERE dbname = 'checkbook';`,
+                  `UPDATE dbupdateinfo SET timeoffiledownload = '${timeofdownload}', lastuploaded = now(), filesize = ${sizeoffile} WHERE dbname = 'checkbook';`,
                   `COMMIT;`
                 ]
      
