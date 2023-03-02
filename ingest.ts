@@ -1,6 +1,8 @@
 const execSync = require('child_process').execSync;
 
 var randomstring = require("randomstring");
+
+const fs = require('fs');
 // import { execSync } from 'child_process';  // replace ^ if using ES modules
 
 const config = require('./config.json');
@@ -58,6 +60,8 @@ const ingestaliasfile = execSync(
   `${setup} -c "\\copy aliastable from './aliases.csv' DELIMITER ',' CSV HEADER;"`, 
    { encoding: 'utf-8',
    stdio: 'inherit'});  // the default is 'buffer'
+     
+     const timeofdownload = new Date().toISOString();
 
 console.log('done making alias table');
 if (true){
@@ -68,6 +72,7 @@ const output = execSync(
      stdio: 'inherit'});  // the default is 'buffer'
 }
 
+     const sizeoffile = fs.statSync(csvname).size;
 
      const postgresingest = execSync(
         `${setup}  -c "
@@ -158,7 +163,6 @@ const output = execSync(
                stdio: 'inherit'});  // the default is 'buffer'
           }
 
-
           const listofsqlrequests = [
             //start the series of transactions, don't save it until the end.
             
@@ -205,6 +209,11 @@ const output = execSync(
                 //create the vendor lookup table
 
                 console.log('main table done');
+     
+     
+                console.log('make db update times');
+     
+              
 
                 console.log('making vendors summed');
 
@@ -293,12 +302,14 @@ const output = execSync(
                 `ALTER TABLE latestyearpervendorsummarynew${nameofidemp} RENAME TO latestyearpervendorsummary;`,
                 `COMMIT;`
               ]
+            
 
                  executesqlarray(thisyearvendorsummedrequests);
 
                  console.log('done making this year vendor summary')
                  
-             
+     
+                 
 
                
 
