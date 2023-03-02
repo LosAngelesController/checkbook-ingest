@@ -336,7 +336,7 @@ const output = execSync(
                   "BEGIN;",
                   `CREATE TABLE IF NOT EXISTS ${checkbooktempnamerowcount} AS (SELECT count(*) FROM losangelescheckbook);`,
                   `DROP TABLE IF EXISTS checkbookrowsize;`,
-                  `ALTER TABLE checkbookrowsize${checkbooktempnamerowcount} RENAME TO checkbookrowsize;`,
+                  `ALTER TABLE ${checkbooktempnamerowcount} RENAME TO checkbookrowsize;`,
                   `COMMIT;`
                 ]
      
