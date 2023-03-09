@@ -137,7 +137,6 @@ const output = execSync(
     site_location VARCHAR(255),
     item_code VARCHAR(255),
     item_code_name VARCHAR(255),
-    currency VARCHAR(255),
     value_of_spend decimal,
     vendor_num VARCHAR(255)
           )
