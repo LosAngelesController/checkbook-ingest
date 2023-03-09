@@ -78,7 +78,7 @@ const output = execSync(
         `${setup}  -c "
         
         CREATE TABLE IF NOT EXISTS init${nameofidemp} (
-          id_number integer PRIMARY KEY,
+    id_number integer PRIMARY KEY,
     fiscal_year smallint,
     department_name VARCHAR(255),
     vendor_name VARCHAR(255),
@@ -98,7 +98,6 @@ const output = execSync(
     settlement_judgment VARCHAR(255),
     fiscal_month_number smallint,
     fiscal_year_month VARCHAR(255),
-    fiscal_year_quarter VARCHAR(255),
     calendar_month_number smallint,
     calendar_month_year VARCHAR(255),
     calendar_month VARCHAR(255),
@@ -107,7 +106,6 @@ const output = execSync(
     authority_link VARCHAR(255),
     department_number VARCHAR(255),
     program VARCHAR(255),
-    vendor_id VARCHAR(255),
     zip VARCHAR(255),
     payment_method VARCHAR(255),
     payment_status VARCHAR(255),
