@@ -61,7 +61,7 @@ const ingestaliasfile = execSync(
    { encoding: 'utf-8',
    stdio: 'inherit'});  // the default is 'buffer'
      
-     const timeofdownload = new Date().toISOString();
+     const timeofdownload = new Date().toISOString().replace('T'," ").replace("Z", "")
 
 console.log('done making alias table');
 if (true){
@@ -216,9 +216,8 @@ const output = execSync(
 
                 const listofsqlrequestsmetainfo = [
                   "BEGIN;",
-                  `CREATE TABLE IF NOT EXISTS dbupdateinfo (timeoffiledownload timestamp, lastuploaded timestamp, lastindexed timestamp, dbname varchar(255), filesize bigint);`,
-                  // update the time, not insert
-                  `UPDATE dbupdateinfo SET timeoffiledownload = ${timeofdownload}, lastuploaded = now(), filesize = ${sizeoffile} WHERE dbname = 'checkbook';`,
+                  `CREATE TABLE IF NOT EXISTS dbupdateinfo (timeoffiledownload timestamp, lastuploaded timestamp, lastindexed timestamp, dbname varchar(255)  PRIMARY KEY, filesize bigint);`,
+                  `INSERT INTO dbupdateinfo (timeoffiledownload, lastuploaded, dbname, filesize) VALUES ('${timeofdownload}', now(), 'checkbook', ${sizeoffile}) ON CONFLICT (dbname) DO UPDATE SET timeoffiledownload = '${timeofdownload}', lastuploaded = now(), filesize = ${sizeoffile};`,
                   `COMMIT;`
                 ]
      
@@ -290,7 +289,7 @@ const output = execSync(
                `BEGIN;`,
                `CREATE TABLE IF NOT EXISTS ${byyeardepttable} AS (SELECT count(*), sum(dollar_amount), department_name, year FROM losangelescheckbook GROUP BY (department_name, year) ORDER BY SUM(dollar_amount) desc);`,
                `CREATE INDEX ${shortIdempotency()} ON ${byyeardepttable} (department_name);`,
-               `CREATE INDEX ${shortIdempotency()} ON ${byyeardepttable} GIN(department_name);`,
+               `CREATE INDEX ${shortIdempotency()} ON ${byyeardepttable} USING GIN(department_name);`,
                 `CREATE INDEX ${shortIdempotency()} ON ${byyeardepttable} (year);`,
                `DROP TABLE IF EXISTS department_summary_by_year;`,
                `ALTER TABLE ${byyeardepttable} RENAME TO department_summary_by_year;`,
@@ -322,13 +321,25 @@ const output = execSync(
                  
                  const listofsqlrequestsmetainfo2 = [
                   "BEGIN;",
-                  `CREATE TABLE IF NOT EXISTS dbupdateinfo (timeoffiledownload = ${timeofdownload}, lastuploaded timestamp, lastindexed timestamp, dbname varchar(255), filesize bigint);`,
+                  `CREATE TABLE IF NOT EXISTS dbupdateinfo (timeoffiledownload timestamp, lastuploaded timestamp, lastindexed timestamp, dbname varchar(255)  PRIMARY KEY, filesize bigint);`,
                   // update the time, not insert
                   `UPDATE dbupdateinfo SET lastindexed = now() WHERE dbname = 'checkbook';`,
                   `COMMIT;`
                 ]
      
                 executesqlarray(listofsqlrequestsmetainfo2);
+               
+                const checkbooktempnamerowcount = `checkbookrowsize${shortIdempotency()}`
+                   
+                const totalrowcount = [
+                  "BEGIN;",
+                  `CREATE TABLE IF NOT EXISTS ${checkbooktempnamerowcount} AS (SELECT count(*) FROM losangelescheckbook);`,
+                  `DROP TABLE IF EXISTS checkbookrowsize;`,
+                  `ALTER TABLE ${checkbooktempnamerowcount} RENAME TO checkbookrowsize;`,
+                  `COMMIT;`
+                ]
+     
+                executesqlarray(totalrowcount);
                
 
             
