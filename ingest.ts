@@ -98,6 +98,7 @@ const output = execSync(
     settlement_judgment VARCHAR(255),
     fiscal_month_number smallint,
     fiscal_year_month VARCHAR(255),
+    fiscal_year_quarter VARCHAR(255),
     calendar_month_number smallint,
     calendar_month_year VARCHAR(255),
     calendar_month VARCHAR(255),
@@ -128,12 +129,15 @@ const output = execSync(
     receiver_id VARCHAR(4095),
     po_date DATE,
     po_line_number decimal,
+    procurement_organization VARCHAR(255),
     buyer_name VARCHAR(255),
     supplier_city VARCHAR(255),
     supplier_country VARCHAR(255),
+    bu_name VARCHAR(255),
     site_location VARCHAR(255),
     item_code VARCHAR(255),
     item_code_name VARCHAR(255),
+    currency VARCHAR(255),
     value_of_spend decimal,
     vendor_num VARCHAR(255)
           )
@@ -188,6 +192,10 @@ const output = execSync(
             `ALTER TABLE losangelescheckbooknew DROP COLUMN IF EXISTS bu_name;`,
             //DROP the useless column procurement_organization
             `ALTER TABLE losangelescheckbooknew DROP COLUMN IF EXISTS procurement_organization;`,
+            //DROP fiscal_year_quarter
+            `ALTER TABLE losangelescheckbooknew DROP COLUMN IF EXISTS fiscal_year_quarter;`,
+            //DROP currency
+            `ALTER TABLE losangelescheckbooknew DROP COLUMN IF EXISTS currency;`,
 
 
             //rename the column vendor_name_new to vendor_name
