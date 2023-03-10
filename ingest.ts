@@ -158,7 +158,7 @@ const output = execSync(
 
           function executesqlarray(sqlarray:Array<string>) {
             execSync(
-              `${setup}  -c "${sqlarray.join('')}"`, 
+              `${setup} --echo-all -c "${sqlarray.join('')}"`, 
                { encoding: 'utf-8',
                stdio: 'inherit'});  // the default is 'buffer'
           }
