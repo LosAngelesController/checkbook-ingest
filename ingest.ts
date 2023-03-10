@@ -161,6 +161,8 @@ const output = execSync(
                stdio: 'inherit'});  // the default is 'buffer'
           }
 
+          //notes: slightly better speed with one transc
+
           const listofsqlrequests = [
             //start the series of transactions, don't save it until the end.
             
@@ -174,8 +176,7 @@ const output = execSync(
 
             //delete column vendor_name
            // `ALTER TABLE losangelescheckbooknew DROP COLUMN vendor_name;`,
-            `ALTER TABLE losangelescheckbooknew DROP COLUMN showas;`,
-            `ALTER TABLE losangelescheckbooknew DROP COLUMN input;`,
+            `ALTER TABLE losangelescheckbooknew DROP COLUMN showas, DROP COLUMN input;`,
 
             //rename the column vendor_name_new to vendor_name
             `ALTER TABLE losangelescheckbooknew RENAME COLUMN vendor_name TO vendor_name_original;`,
@@ -192,6 +193,7 @@ const output = execSync(
               `CREATE INDEX datedesc${nameofidemp} on losangelescheckbooknew USING BTREE (transaction_date desc);`,
               `CREATE INDEX amountdesc${nameofidemp} on losangelescheckbooknew USING BTREE (dollar_amount desc);`,
               `CREATE INDEX amountasc${nameofidemp} on losangelescheckbooknew USING BTREE (dollar_amount asc);`,
+              `VACUUM FULL;`,
               'BEGIN;',
             //move the old table out of the way
             `ALTER TABLE losangelescheckbook RENAME TO losangelescheckbookold;`,
