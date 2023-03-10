@@ -172,7 +172,7 @@ const output = execSync(
             //create the real table
             `CREATE TABLE IF NOT EXISTS losangelescheckbooknew AS (SELECT *,
               DATE_PART('YEAR', transaction_date) as year ,
-              (CASE  WHEN authority_link ILIKE '%http://cityclerk.lacity.org/lacityclerkconnect/index.cfm?%' THEN 'c/' + split_part(authority_link, '=', 3) ELSE authority_link END) as authority_link_new,
+              (CASE  WHEN authority_link ILIKE '%http://cityclerk.lacity.org/lacityclerkconnect/index.cfm?%' THEN concat('c/', split_part(authority_link, '=', 3)) ELSE authority_link END) as authority_link_new,
               COALESCE ( showas,vendor_name ) as vendor_name_new FROM aliased${nameofidemp});`,
 
             //delete column vendor_name
