@@ -129,11 +129,9 @@ const output = execSync(
     receiver_id VARCHAR(4095),
     po_date DATE,
     po_line_number decimal,
-    procurement_organization VARCHAR(255),
     buyer_name VARCHAR(255),
     supplier_city VARCHAR(255),
     supplier_country VARCHAR(255),
-    bu_name VARCHAR(255),
     site_location VARCHAR(255),
     item_code VARCHAR(255),
     item_code_name VARCHAR(255),
@@ -172,12 +170,27 @@ const output = execSync(
             //create the real table
             `CREATE TABLE IF NOT EXISTS losangelescheckbooknew AS (SELECT *,
               DATE_PART('YEAR', transaction_date) as year ,
+              (CASE  WHEN authority_link ILIKE '%http://cityclerk.lacity.org/lacityclerkconnect/index.cfm?%' THEN 'c/' + split_part(authority_link, '=', 3) ELSE authority_link END) as authority_link_new,
               COALESCE ( showas,vendor_name ) as vendor_name_new FROM aliased${nameofidemp});`,
 
             //delete column vendor_name
            // `ALTER TABLE losangelescheckbooknew DROP COLUMN vendor_name;`,
             `ALTER TABLE losangelescheckbooknew DROP COLUMN showas;`,
             `ALTER TABLE losangelescheckbooknew DROP COLUMN input;`,
+
+            //delete the old column authority_link
+            //rename the column authority_link_new to authority_link
+
+            `ALTER TABLE losangelescheckbooknew RENAME COLUMN authority_link TO authority_link_original;`,
+            `ALTER TABLE losangelescheckbooknew RENAME COLUMN authority_link_new TO authority_link;`,
+              //now delete authority_link_original
+            `ALTER TABLE losangelescheckbooknew DROP COLUMN IF EXISTS authority_link_original;`,
+            `ALTER TABLE losangelescheckbooknew DROP COLUMN IF EXISTS department_number;`,
+            //drop bu_name
+            `ALTER TABLE losangelescheckbooknew DROP COLUMN IF EXISTS bu_name;`,
+            //DROP the useless column procurement_organization
+            `ALTER TABLE losangelescheckbooknew DROP COLUMN IF EXISTS procurement_organization;`,
+
 
             //rename the column vendor_name_new to vendor_name
             `ALTER TABLE losangelescheckbooknew RENAME COLUMN vendor_name TO vendor_name_original;`,
@@ -196,6 +209,7 @@ const output = execSync(
               `CREATE INDEX amountasc${nameofidemp} on losangelescheckbooknew USING BTREE (dollar_amount asc);`,
               `CREATE INDEX deptdate${nameofidemp} on losangelescheckbooknew USING BTREE (department_name, transaction_date);`,
               `CREATE INDEX vendordate${nameofidemp} on losangelescheckbooknew USING BTREE (vendor_name, transaction_date);`,
+              `CREATE INDEX vendordept${nameofidemp} on losangelescheckbooknew USING BTREE (vendor_name, department_name);`,
               `CREATE INDEX accountdate${nameofidemp} on losangelescheckbooknew USING BTREE (account_name, transaction_date);`,
               
               `CREATE INDEX funddate${nameofidemp} on losangelescheckbooknew USING BTREE (fund_name, transaction_date);`,
@@ -209,7 +223,8 @@ const output = execSync(
               //drop the old table
               `DROP TABLE losangelescheckbookold;`,
               //commit the action
-             `COMMIT;`
+             `COMMIT;`,
+             `VACUUM;`
           ]
           executesqlarray(listofsqlrequests);
 
@@ -344,7 +359,8 @@ const output = execSync(
                   `CREATE TABLE IF NOT EXISTS ${checkbooktempnamerowcount} AS (SELECT count(*) FROM losangelescheckbook);`,
                   `DROP TABLE IF EXISTS checkbookrowsize;`,
                   `ALTER TABLE ${checkbooktempnamerowcount} RENAME TO checkbookrowsize;`,
-                  `COMMIT;`
+                  `COMMIT;`,
+                  `VACUUM;`
                 ]
      
                 executesqlarray(totalrowcount);
