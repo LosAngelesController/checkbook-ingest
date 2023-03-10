@@ -98,7 +98,6 @@ const output = execSync(
     settlement_judgment VARCHAR(255),
     fiscal_month_number smallint,
     fiscal_year_month VARCHAR(255),
-    fiscal_year_quarter VARCHAR(255),
     calendar_month_number smallint,
     calendar_month_year VARCHAR(255),
     calendar_month VARCHAR(255),
@@ -135,7 +134,6 @@ const output = execSync(
     site_location VARCHAR(255),
     item_code VARCHAR(255),
     item_code_name VARCHAR(255),
-    currency VARCHAR(255),
     value_of_spend decimal,
     vendor_num VARCHAR(255)
           )
