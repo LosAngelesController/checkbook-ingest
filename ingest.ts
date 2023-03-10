@@ -170,7 +170,7 @@ const output = execSync(
             
             //perform an alias lookup
             `EXPLAIN ANALYZE VERBOSE CREATE TABLE IF NOT EXISTS aliased${nameofidemp} AS (SELECT * from init${nameofidemp} LEFT JOIN aliastable ON init${nameofidemp}.vendor_name = aliastable.input);`,
-            `EXPLAIN ANALYZE VERBOSE DROP TABLE IF EXISTS losangelescheckbooknew;`,
+            `DROP TABLE IF EXISTS losangelescheckbooknew;`,
             //create the real table
             `EXPLAIN ANALYZE VERBOSE CREATE TABLE IF NOT EXISTS losangelescheckbooknew AS (SELECT *,
               DATE_PART('YEAR', transaction_date) as year ,
@@ -197,8 +197,9 @@ const output = execSync(
             `ALTER TABLE losangelescheckbooknew RENAME COLUMN vendor_name_new TO vendor_name;`,
             //rename the aliased table into losangelescheckbook
               //drop the init table
-              `EXPLAIN ANALYZE VERBOSE ALTER TABLE losangelescheckbooknew  DROP TABLE IF EXISTS init${nameofidemp};`,
-              `EXPLAIN ANALYZE VERBOSE ALTER TABLE losangelescheckbooknew DROP TABLE IF EXISTS aliased${nameofidemp};`,
+
+              `DROP TABLE IF EXISTS init${nameofidemp};`,
+              `DROP TABLE IF EXISTS aliased${nameofidemp};`,
               //stacks of indexes go here
               `EXPLAIN ANALYZE VERBOSE CREATE INDEX losangelescheckbook_department_name_idx_${nameofidemp} ON losangelescheckbooknew USING BTREE (department_name);`,
               `EXPLAIN ANALYZE VERBOSE CREATE INDEX losangelescheckbook_vendor_name_btree_idx_${nameofidemp} ON losangelescheckbooknew USING BTREE (vendor_name);`,
