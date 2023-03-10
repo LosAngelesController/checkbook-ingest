@@ -194,6 +194,13 @@ const output = execSync(
               `CREATE INDEX datedesc${nameofidemp} on losangelescheckbooknew USING BTREE (transaction_date desc);`,
               `CREATE INDEX amountdesc${nameofidemp} on losangelescheckbooknew USING BTREE (dollar_amount desc);`,
               `CREATE INDEX amountasc${nameofidemp} on losangelescheckbooknew USING BTREE (dollar_amount asc);`,
+              `CREATE INDEX deptdate${nameofidemp} on losangelescheckbooknew USING BTREE (department_name, transaction_date);`,
+              `CREATE INDEX vendordate${nameofidemp} on losangelescheckbooknew USING BTREE (vendor_name, transaction_date);`,
+              `CREATE INDEX accountdate${nameofidemp} on losangelescheckbooknew USING BTREE (account_name, transaction_date);`,
+              
+              `CREATE INDEX funddate${nameofidemp} on losangelescheckbooknew USING BTREE (fund_name, transaction_date);`,
+              
+              `CREATE INDEX programdate${nameofidemp} on losangelescheckbooknew USING BTREE (program_name, transaction_date);`,
               'BEGIN;',
             //move the old table out of the way
             `ALTER TABLE losangelescheckbook RENAME TO losangelescheckbookold;`,
