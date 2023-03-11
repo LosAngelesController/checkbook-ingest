@@ -220,8 +220,8 @@ const output = execSync(
               ` CREATE INDEX accountdatedesc${nameofidemp} on losangelescheckbooknew USING BTREE (account_name, transaction_date desc);`,
               ` CREATE INDEX funddateasc${nameofidemp} on losangelescheckbooknew USING BTREE (fund_name, transaction_date asc);`,
               ` CREATE INDEX funddatedesc${nameofidemp} on losangelescheckbooknew USING BTREE (fund_name, transaction_date desc);`,
-              ` CREATE INDEX programdateasc${nameofidemp} on losangelescheckbooknew USING BTREE (program_name, transaction_date asc);`,
-              ` CREATE INDEX programdatedesc${nameofidemp} on losangelescheckbooknew USING BTREE (program_name, transaction_date desc);`
+              ` CREATE INDEX programdateasc${nameofidemp} on losangelescheckbooknew USING BTREE (program, transaction_date asc);`,
+              ` CREATE INDEX programdatedesc${nameofidemp} on losangelescheckbooknew USING BTREE (program, transaction_date desc);`
           ]
 
 
