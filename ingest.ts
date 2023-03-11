@@ -200,7 +200,6 @@ const output = execSync(
             //rename the column vendor_name_new to vendor_name
             `ALTER TABLE losangelescheckbooknew RENAME COLUMN vendor_name TO vendor_name_original;`,
             `ALTER TABLE losangelescheckbooknew RENAME COLUMN vendor_name_new TO vendor_name;`,
-            `ALTER TABLE losangelescheckbooknew DROP COLUMN vendor_name_original;`,
             //rename the aliased table into losangelescheckbook
               //drop the init table
               
