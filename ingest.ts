@@ -371,10 +371,11 @@ const output = execSync(
                   `DROP TABLE IF EXISTS checkbookrowsize;`,
                   `ALTER TABLE ${checkbooktempnamerowcount} RENAME TO checkbookrowsize;`,
                   `COMMIT;`,
-                  `VACUUM;`
                 ]
      
                 executesqlarray(totalrowcount);
+
+                executesqlarray([`VACUUM;`])
                
 
             
