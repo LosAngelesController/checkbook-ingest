@@ -173,6 +173,7 @@ const output = execSync(
             `DROP TABLE IF EXISTS losangelescheckbooknew;`,
             //create the real table
             ` CREATE TABLE IF NOT EXISTS losangelescheckbooknew AS (SELECT *,
+              TRIM(REPLACE((CASE WHEN department_name 'CIVIL, HUMAN RIGHTS, AND EQUITY DEPARTMENT' or department_name like 'CIVIL, HUMAN RIGHTS AND EQUITY DEPARTMENT' THEN 'CIVIL + HUMAN RIGHTS AND EQUITY' else department_name END)), 'DEPARTMENT', "") as department_name_new, 
               (case when settlement_judgment notnull then true else null end) as settlement_judgment_bool,
               DATE_PART('YEAR', transaction_date) as year ,
               (CASE  WHEN authority_link ILIKE '%http://cityclerk.lacity.org/lacityclerkconnect/index.cfm?%' THEN concat('c/', split_part(authority_link, '=', 3)) ELSE authority_link END) as authority_link_new,
@@ -187,6 +188,9 @@ const output = execSync(
 
             ` ALTER TABLE losangelescheckbooknew RENAME COLUMN authority_link TO authority_link_original;`,
             ` ALTER TABLE losangelescheckbooknew RENAME COLUMN authority_link_new TO authority_link;`,
+
+            `DROP COLUMN IF EXISTS department_name;`,
+            `ALTER TABLE losangelescheckbooknew RENAME COLUMN department_name_new TO department_name;`,
               //now delete authority_link_original
             ` ALTER TABLE losangelescheckbooknew DROP COLUMN IF EXISTS authority_link_original,
              DROP COLUMN IF EXISTS bu_name, DROP COLUMN IF EXISTS department_number,
