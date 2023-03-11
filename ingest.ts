@@ -169,25 +169,25 @@ const output = execSync(
             //start the series of transactions, don't save it until the end.
             
             //perform an alias lookup
-            `EXPLAIN ANALYZE VERBOSE CREATE TABLE IF NOT EXISTS aliased${nameofidemp} AS (SELECT * from init${nameofidemp} LEFT JOIN aliastable ON init${nameofidemp}.vendor_name = aliastable.input);`,
+            ` CREATE TABLE IF NOT EXISTS aliased${nameofidemp} AS (SELECT * from init${nameofidemp} LEFT JOIN aliastable ON init${nameofidemp}.vendor_name = aliastable.input);`,
             `DROP TABLE IF EXISTS losangelescheckbooknew;`,
             //create the real table
-            `EXPLAIN ANALYZE VERBOSE CREATE TABLE IF NOT EXISTS losangelescheckbooknew AS (SELECT *,
+            ` CREATE TABLE IF NOT EXISTS losangelescheckbooknew AS (SELECT *,
               DATE_PART('YEAR', transaction_date) as year ,
               (CASE  WHEN authority_link ILIKE '%http://cityclerk.lacity.org/lacityclerkconnect/index.cfm?%' THEN concat('c/', split_part(authority_link, '=', 3)) ELSE authority_link END) as authority_link_new,
               COALESCE ( showas,vendor_name ) as vendor_name_new FROM aliased${nameofidemp});`,
 
             //delete column vendor_name
            // `ALTER TABLE losangelescheckbooknew DROP COLUMN vendor_name;`,
-            `EXPLAIN ANALYZE VERBOSE ALTER TABLE losangelescheckbooknew DROP COLUMN showas, DROP COLUMN input;`,
+            ` ALTER TABLE losangelescheckbooknew DROP COLUMN showas, DROP COLUMN input;`,
 
             //delete the old column authority_link
             //rename the column authority_link_new to authority_link
 
-            `EXPLAIN ANALYZE VERBOSE ALTER TABLE losangelescheckbooknew RENAME COLUMN authority_link TO authority_link_original;`,
-            `EXPLAIN ANALYZE VERBOSE ALTER TABLE losangelescheckbooknew RENAME COLUMN authority_link_new TO authority_link;`,
+            ` ALTER TABLE losangelescheckbooknew RENAME COLUMN authority_link TO authority_link_original;`,
+            ` ALTER TABLE losangelescheckbooknew RENAME COLUMN authority_link_new TO authority_link;`,
               //now delete authority_link_original
-            `EXPLAIN ANALYZE VERBOSE ALTER TABLE losangelescheckbooknew DROP COLUMN IF EXISTS authority_link_original,
+            ` ALTER TABLE losangelescheckbooknew DROP COLUMN IF EXISTS authority_link_original,
              DROP COLUMN IF EXISTS bu_name, DROP COLUMN IF EXISTS department_number,
              DROP COLUMN IF EXISTS procurement_organization, DROP COLUMN IF EXISTS fiscal_year_quarter,
               DROP COLUMN IF EXISTS currency;`,
@@ -197,31 +197,31 @@ const output = execSync(
             `ALTER TABLE losangelescheckbooknew RENAME COLUMN vendor_name_new TO vendor_name;`,
             //rename the aliased table into losangelescheckbook
               //drop the init table
-
+              
               `DROP TABLE IF EXISTS init${nameofidemp};`,
               `DROP TABLE IF EXISTS aliased${nameofidemp};`,
               //stacks of indexes go here
-              `EXPLAIN ANALYZE VERBOSE CREATE INDEX losangelescheckbook_department_name_idx_${nameofidemp} ON losangelescheckbooknew USING BTREE (department_name);`,
-              `EXPLAIN ANALYZE VERBOSE CREATE INDEX losangelescheckbook_vendor_name_btree_idx_${nameofidemp} ON losangelescheckbooknew USING BTREE (vendor_name);`,
-              `EXPLAIN ANALYZE VERBOSE CREATE INDEX losangelescheckbook_vendor_name_idx_${nameofidemp} ON losangelescheckbooknew USING GIN(vendor_name);`,
-              `EXPLAIN ANALYZE VERBOSE CREATE INDEX dateasc${nameofidemp} on losangelescheckbooknew USING BTREE (transaction_date asc);`,
-              `EXPLAIN ANALYZE VERBOSE CREATE INDEX datedesc${nameofidemp} on losangelescheckbooknew USING BTREE (transaction_date desc);`,
-              `EXPLAIN ANALYZE VERBOSE CREATE INDEX amountdesc${nameofidemp} on losangelescheckbooknew USING BTREE (dollar_amount desc);`,
-              `EXPLAIN ANALYZE VERBOSE CREATE INDEX amountasc${nameofidemp} on losangelescheckbooknew USING BTREE (dollar_amount asc);`,
-              `EXPLAIN ANALYZE VERBOSE CREATE INDEX deptdateasc${nameofidemp} on losangelescheckbooknew USING BTREE (department_name, transaction_date asc);`,
-              `EXPLAIN ANALYZE VERBOSE CREATE INDEX deptdatedesc${nameofidemp} on losangelescheckbooknew USING BTREE (department_name, transaction_date desc);`,
-              `EXPLAIN ANALYZE VERBOSE CREATE INDEX vendordateasc${nameofidemp} on losangelescheckbooknew USING BTREE (vendor_name, transaction_date asc);`,
-              `EXPLAIN ANALYZE VERBOSE CREATE INDEX vendordatedesc${nameofidemp} on losangelescheckbooknew USING BTREE (vendor_name, transaction_date desc);`,
-              `EXPLAIN ANALYZE VERBOSE CREATE INDEX vendordeptasc${nameofidemp} on losangelescheckbooknew USING BTREE (vendor_name, department_name asc);`,
-              `EXPLAIN ANALYZE VERBOSE CREATE INDEX vendoramountasc${nameofidemp} on losangelescheckbooknew USING BTREE (vendor_name, dollar_amount asc);`,
-              `EXPLAIN ANALYZE VERBOSE CREATE INDEX vendoramountdesc${nameofidemp} on losangelescheckbooknew USING BTREE (vendor_name, dollar_amount desc);`,
-              `EXPLAIN ANALYZE VERBOSE CREATE INDEX vendordeptdesc${nameofidemp} on losangelescheckbooknew USING BTREE (vendor_name, department_name desc);`,
-              `EXPLAIN ANALYZE VERBOSE CREATE INDEX accountdateasc${nameofidemp} on losangelescheckbooknew USING BTREE (account_name, transaction_date asc);`,
-              `EXPLAIN ANALYZE VERBOSE CREATE INDEX accountdatedesc${nameofidemp} on losangelescheckbooknew USING BTREE (account_name, transaction_date desc);`,
-              `EXPLAIN ANALYZE VERBOSE CREATE INDEX funddateasc${nameofidemp} on losangelescheckbooknew USING BTREE (fund_name, transaction_date asc);`,
-              `EXPLAIN ANALYZE VERBOSE CREATE INDEX funddatedesc${nameofidemp} on losangelescheckbooknew USING BTREE (fund_name, transaction_date desc);`,
-              `EXPLAIN ANALYZE VERBOSE CREATE INDEX programdateasc${nameofidemp} on losangelescheckbooknew USING BTREE (program_name, transaction_date asc);`,
-              `EXPLAIN ANALYZE VERBOSE CREATE INDEX programdatedesc${nameofidemp} on losangelescheckbooknew USING BTREE (program_name, transaction_date desc);`
+              ` CREATE INDEX losangelescheckbook_department_name_idx_${nameofidemp} ON losangelescheckbooknew USING BTREE (department_name);`,
+              ` CREATE INDEX losangelescheckbook_vendor_name_btree_idx_${nameofidemp} ON losangelescheckbooknew USING BTREE (vendor_name);`,
+              ` CREATE INDEX losangelescheckbook_vendor_name_idx_${nameofidemp} ON losangelescheckbooknew USING GIN(vendor_name);`,
+              ` CREATE INDEX dateasc${nameofidemp} on losangelescheckbooknew USING BTREE (transaction_date asc);`,
+              ` CREATE INDEX datedesc${nameofidemp} on losangelescheckbooknew USING BTREE (transaction_date desc);`,
+              ` CREATE INDEX amountdesc${nameofidemp} on losangelescheckbooknew USING BTREE (dollar_amount desc);`,
+              ` CREATE INDEX amountasc${nameofidemp} on losangelescheckbooknew USING BTREE (dollar_amount asc);`,
+              ` CREATE INDEX deptdateasc${nameofidemp} on losangelescheckbooknew USING BTREE (department_name, transaction_date asc);`,
+              ` CREATE INDEX deptdatedesc${nameofidemp} on losangelescheckbooknew USING BTREE (department_name, transaction_date desc);`,
+              ` CREATE INDEX vendordateasc${nameofidemp} on losangelescheckbooknew USING BTREE (vendor_name, transaction_date asc);`,
+              ` CREATE INDEX vendordatedesc${nameofidemp} on losangelescheckbooknew USING BTREE (vendor_name, transaction_date desc);`,
+              ` CREATE INDEX vendordeptasc${nameofidemp} on losangelescheckbooknew USING BTREE (vendor_name, department_name asc);`,
+              ` CREATE INDEX vendoramountasc${nameofidemp} on losangelescheckbooknew USING BTREE (vendor_name, dollar_amount asc);`,
+              ` CREATE INDEX vendoramountdesc${nameofidemp} on losangelescheckbooknew USING BTREE (vendor_name, dollar_amount desc);`,
+              ` CREATE INDEX vendordeptdesc${nameofidemp} on losangelescheckbooknew USING BTREE (vendor_name, department_name desc);`,
+              ` CREATE INDEX accountdateasc${nameofidemp} on losangelescheckbooknew USING BTREE (account_name, transaction_date asc);`,
+              ` CREATE INDEX accountdatedesc${nameofidemp} on losangelescheckbooknew USING BTREE (account_name, transaction_date desc);`,
+              ` CREATE INDEX funddateasc${nameofidemp} on losangelescheckbooknew USING BTREE (fund_name, transaction_date asc);`,
+              ` CREATE INDEX funddatedesc${nameofidemp} on losangelescheckbooknew USING BTREE (fund_name, transaction_date desc);`,
+              ` CREATE INDEX programdateasc${nameofidemp} on losangelescheckbooknew USING BTREE (program_name, transaction_date asc);`,
+              ` CREATE INDEX programdatedesc${nameofidemp} on losangelescheckbooknew USING BTREE (program_name, transaction_date desc);`
           ]
 
 
