@@ -189,7 +189,7 @@ const output = execSync(
             ` ALTER TABLE losangelescheckbooknew RENAME COLUMN authority_link TO authority_link_original;`,
             ` ALTER TABLE losangelescheckbooknew RENAME COLUMN authority_link_new TO authority_link;`,
 
-            `DROP COLUMN IF EXISTS department_name;`,
+            `ALTER TABLE losangelescheckbooknew DROP COLUMN IF EXISTS department_name;`,
             `ALTER TABLE losangelescheckbooknew RENAME COLUMN department_name_new TO department_name;`,
               //now delete authority_link_original
             ` ALTER TABLE losangelescheckbooknew DROP COLUMN IF EXISTS authority_link_original,
